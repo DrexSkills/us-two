@@ -12,6 +12,8 @@ A cooperative 16-bit pixel-art adventure for couples. One player is the Boy, sea
 - Walking and running
 - Full-screen parchment map with areas, fog over unexplored parts, and a "You" marker (Map button or M key)
 - Controls: on-screen joystick on phones, ← → / A D + Shift on desktop
+- Story voices using the device's built-in speech (calm voice for him, soft voice for her), with a mute button
+- Settings: voices on/off, volume, voice pace, text speed (saved on the device)
 - Asks phone players to rotate to landscape
 
 ## Run it

@@ -43,7 +43,7 @@ input{font:inherit;font-size:20px;background:#0a1214;color:var(--paper);border:4
 #hud.on{display:block}
 .who{position:absolute;top:calc(env(safe-area-inset-top,0px) + 12px);left:calc(env(safe-area-inset-left,0px) + 14px);font-size:18px;background:rgba(8,16,19,.7);padding:6px 12px;border:3px solid var(--line)}
 .hbtns{position:absolute;top:calc(env(safe-area-inset-top,0px) + 10px);right:calc(env(safe-area-inset-right,0px) + 12px);display:flex;gap:8px}
-#quit,#mapbtn{pointer-events:auto;font:inherit;font-size:16px;color:var(--paper);background:rgba(8,16,19,.7);border:3px solid var(--line);min-width:48px;min-height:44px;padding:6px 12px;cursor:pointer}
+#quit,#mapbtn,#setbtn{pointer-events:auto;font:inherit;font-size:16px;color:var(--paper);background:rgba(8,16,19,.7);border:3px solid var(--line);min-width:48px;min-height:44px;padding:6px 12px;cursor:pointer}
 #title{position:absolute;left:0;right:0;top:22%;font-size:clamp(26px,5vw,44px);color:var(--paper);text-shadow:3px 3px 0 #000;opacity:0;transition:opacity .9s}
 #title small{display:block;font-size:.5em;color:var(--rose);margin-bottom:4px}
 #keys{position:absolute;bottom:calc(env(safe-area-inset-bottom,0px) + 14px);left:0;right:0;font-size:16px;opacity:.65}
@@ -61,8 +61,24 @@ input{font:inherit;font-size:20px;background:#0a1214;color:var(--paper);border:4
 #txt{font-size:clamp(18px,2.6vw,22px);line-height:1.35;min-height:2.6em}
 #nxt{font-size:14px;opacity:.6;text-align:right;animation:blink 1s steps(2) infinite}
 @keyframes blink{50%{opacity:0}}
-#skip{position:fixed;z-index:9;bottom:calc(env(safe-area-inset-bottom,0px) + 12px);right:calc(env(safe-area-inset-right,0px) + 12px);font:inherit;font-size:16px;color:var(--paper);background:rgba(8,16,19,.7);border:3px solid var(--line);min-height:44px;padding:6px 14px;cursor:pointer;display:none}
-#skip.on{display:block}
+#skip,#mute{position:fixed;z-index:9;bottom:calc(env(safe-area-inset-bottom,0px) + 12px);right:calc(env(safe-area-inset-right,0px) + 12px);font:inherit;font-size:16px;color:var(--paper);background:rgba(8,16,19,.7);border:3px solid var(--line);min-height:44px;padding:6px 14px;cursor:pointer;display:none}
+#skip.on,#mute.on{display:block}
+#mute{right:auto;left:calc(env(safe-area-inset-left,0px) + 12px)}
+#setbtn{font-size:20px;min-width:48px}
+#settings{position:fixed;inset:0;z-index:12;background:rgba(5,9,11,.85);display:none;align-items:center;justify-content:center;padding:max(12px,env(safe-area-inset-top)) 16px max(12px,env(safe-area-inset-bottom))}
+#settings.on{display:flex}
+.panel{background:#13221f;border:4px solid var(--paper);box-shadow:0 0 0 4px #000,0 12px 30px rgba(0,0,0,.6);width:min(440px,100%);max-height:100%;overflow-y:auto;padding:16px 18px 18px}
+.panel h2{font-size:26px;margin:0 0 6px;text-align:center}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:54px;border-bottom:2px solid var(--line);font-size:19px}
+.row:last-of-type{border-bottom:0}
+.seg{display:flex;gap:6px}
+.seg button,.tog{font:inherit;font-size:16px;min-height:44px;min-width:64px;padding:6px 10px;color:var(--paper);background:#0a1214;border:3px solid var(--line);cursor:pointer}
+.seg button[aria-pressed="true"],.tog[aria-pressed="true"]{background:var(--rose);color:var(--ink);border-color:#5a2f33}
+input[type=range]{width:150px;accent-color:var(--ember);padding:0;border:0;background:none}
+.panel .acts{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px}
+.panel .acts .btn{min-width:150px;font-size:19px;min-height:50px;padding:8px 16px}
+.btn.ghost{background:#2b3c3a;color:var(--paper);box-shadow:inset -4px -4px 0 #1a2624, inset 4px 4px 0 #3e5552, 0 4px 0 #000}
+#novoice{font-size:15px;color:var(--rose);margin:8px 0 0;text-align:center;display:none}
 #mapbtn{font-size:18px;min-width:72px;border-color:#7a5c34;color:#f2dcae}
 #map{position:fixed;inset:0;z-index:7;background:rgba(5,9,11,.9);display:none;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:max(12px,env(safe-area-inset-top)) 16px max(12px,env(safe-area-inset-bottom))}
 #map.on{display:flex}
@@ -84,6 +100,7 @@ input{font:inherit;font-size:20px;background:#0a1214;color:var(--paper);border:4
   <div><h1>Us Two</h1><span class="heart">♥</span></div>
   <p class="tag">Two players.<br>One adventure.<br>Find each other.</p>
   <button class="btn" id="start">Start</button>
+  <button class="link" id="menuSettings">Settings</button>
 </section>
 
 <section id="setup" class="screen">
@@ -98,7 +115,7 @@ input{font:inherit;font-size:20px;background:#0a1214;color:var(--paper);border:4
 
 <div id="hud">
   <div class="who" id="who"></div>
-  <div class="hbtns"><button id="mapbtn" aria-label="Open map">🗺 Map</button><button id="quit" aria-label="Back to menu">Menu</button></div>
+  <div class="hbtns"><button id="mapbtn" aria-label="Open map">🗺 Map</button><button id="setbtn" aria-label="Settings">⚙</button><button id="quit" aria-label="Back to menu">Menu</button></div>
   <div id="title"></div>
   <div id="keys">Walk with ← → or A / D · hold Shift to run · M for map</div>
   <div id="stick"><div id="knob"></div></div>
@@ -108,6 +125,16 @@ input{font:inherit;font-size:20px;background:#0a1214;color:var(--paper);border:4
 <div id="fade"><div id="card"></div></div>
 <div id="dlg"><div id="spk"></div><div id="txt"></div><div id="nxt">Tap to continue ▼</div></div>
 <button id="skip">Skip story</button>
+<button id="mute" aria-label="Toggle voices">🔊 Voices</button>
+<div id="settings" role="dialog" aria-label="Settings"><div class="panel">
+  <h2>Settings</h2>
+  <div class="row"><span>Story voices</span><button class="tog" id="s-voice">On</button></div>
+  <div class="row"><span>Voice volume</span><input type="range" id="s-vol" min="0" max="1" step="0.1" aria-label="Voice volume"></div>
+  <div class="row"><span>Voice pace</span><div class="seg" data-k="calm"><button data-v="true">Calm</button><button data-v="false">Normal</button></div></div>
+  <div class="row"><span>Text speed</span><div class="seg" data-k="text"><button data-v="slow">Slow</button><button data-v="normal">Normal</button><button data-v="fast">Fast</button></div></div>
+  <p id="novoice">This browser can't read text aloud, so the story is text only.</p>
+  <div class="acts"><button class="btn ghost" id="s-test">Hear voices</button><button class="btn" id="s-close">Done</button></div>
+</div></div>
 <div id="rotate"><div class="phone"></div><p>Turn your phone sideways to play</p></div>
 
 <script>
@@ -448,7 +475,7 @@ function startStory(choice){
   setFade(1);
   const mk = () => ({ x: 0, face: 1, speed: 0, t: 0, vis: true, carry: false });
   story = { choice, script: buildScript(choice), i: -1, a: { boy: mk(), girl: mk() }, cam: 0, camT: 0, wait: 0, step: null, done: false };
-  $('skip').classList.add('on');
+  $('skip').classList.add('on'); $('mute').classList.add('on');
   nextStep();
 }
 function nextStep(){
@@ -462,7 +489,7 @@ function nextStep(){
     if (s.fade){ setFade(s.fade === 'out' ? 1 : 0); story.wait = 1; }
     if (s.card){ cardEl.textContent = s.card; cardEl.style.opacity = 1; story.wait = 2.4; }
     if (s.wait) story.wait = s.wait;
-    if (s.say){ spk.textContent = s.say[0] === 'boy' ? 'He' : 'She'; spk.className = s.say[0]; story.full = s.say[1]; story.chars = 0; txt.textContent = ''; dlg.classList.add('on'); }
+    if (s.say){ spk.textContent = s.say[0] === 'boy' ? 'He' : 'She'; spk.className = s.say[0]; story.full = s.say[1]; story.chars = 0; txt.textContent = ''; dlg.classList.add('on'); speak(s.say[0], s.say[1]); }
     if (!s.walk && !s.say && !s.fade && !s.card && !s.wait) continue;
     return;
   }
@@ -485,7 +512,7 @@ function storyUpdate(dt){
     arrived = false; const d = Math.sign(s.lureTo - st.lure.x); st.lure.x += d * 50 * dt;
     if (Math.sign(s.lureTo - st.lure.x) !== d) st.lure.x = s.lureTo;
   }
-  if (s.say){ if (st.chars < st.full.length){ st.chars = Math.min(st.full.length, st.chars + dt * 40); txt.textContent = st.full.slice(0, Math.floor(st.chars)); } return; }
+  if (s.say){ if (st.chars < st.full.length){ st.chars = Math.min(st.full.length, st.chars + dt * TEXT_SPEED[SET.text]); txt.textContent = st.full.slice(0, Math.floor(st.chars)); } return; }
   if (s.walk && !arrived) return;
   if (st.wait > 0){ st.wait -= dt; if (st.wait > 0) return; }
   if (s.card) cardEl.style.opacity = 0;
@@ -494,15 +521,15 @@ function storyUpdate(dt){
 function advance(){
   if (!story || !story.step || !story.step.say) return;
   if (story.chars < story.full.length){ story.chars = story.full.length; txt.textContent = story.full; return; }
-  dlg.classList.remove('on'); nextStep();
+  hush(); dlg.classList.remove('on'); nextStep();
 }
 dlg.addEventListener('pointerdown', e => { e.preventDefault(); advance(); });
 cv.addEventListener('pointerdown', () => advance());
 addEventListener('keydown', e => { if (story && (e.key === ' ' || e.key === 'Enter')){ e.preventDefault(); advance(); } });
 function endStory(){
   const choice = story ? story.choice : 'boy';
-  story = null; camp.lantern = true; camp.wood = true;
-  dlg.classList.remove('on'); cardEl.style.opacity = 0; $('skip').classList.remove('on');
+  hush(); story = null; camp.lantern = true; camp.wood = true;
+  dlg.classList.remove('on'); cardEl.style.opacity = 0; $('skip').classList.remove('on'); $('mute').classList.remove('on');
   beginPlay(choice);
 }
 $('skip').onclick = () => endStory();
@@ -519,6 +546,61 @@ function showTitle(small, big){
   const t = $('title'); t.innerHTML = `<small>${small}</small>${big}`; t.style.opacity = 1;
   clearTimeout(titleTimer); titleTimer = setTimeout(() => t.style.opacity = 0, 3000);
 }
+
+/* ---------- settings + voices ---------- */
+const SET = { voice: true, vol: 1, calm: true, text: 'normal' };
+try { Object.assign(SET, JSON.parse(localStorage.getItem('us2-settings') || '{}')); } catch (e) {}
+function saveSet(){ try { localStorage.setItem('us2-settings', JSON.stringify(SET)); } catch (e) {} }
+const TEXT_SPEED = { slow: 22, normal: 40, fast: 85 };
+const TTS = 'speechSynthesis' in window ? window.speechSynthesis : null;
+const VOICES = { boy: null, girl: null };
+function pickVoices(){
+  if (!TTS) return;
+  const vs = TTS.getVoices().filter(v => /^en/i.test(v.lang)); if (!vs.length) return;
+  const find = names => { for (const n of names){ const v = vs.find(v => v.name.toLowerCase().includes(n)); if (v) return v; } };
+  VOICES.boy = find(['daniel','arthur','oliver','rishi','aaron','tom','alex','fred','gordon','guy','david','ryan','uk english male']) || vs[0];
+  VOICES.girl = find(['samantha','serena','tessa','moira','karen','martha','fiona','ava','allison','susan','victoria','aria','jenny','libby','sonia','zira','uk english female','us english']) || vs.find(v => v !== VOICES.boy) || vs[0];
+}
+if (TTS){ pickVoices(); TTS.onvoiceschanged = pickVoices; }
+function speak(who, text, queue){
+  if (!TTS || !SET.voice) return;
+  if (!queue) TTS.cancel();
+  const u = new SpeechSynthesisUtterance(text.replace(/—/g, ', '));
+  const v = VOICES[who]; if (v){ u.voice = v; u.lang = v.lang; }
+  const same = VOICES.boy === VOICES.girl;
+  u.pitch = who === 'boy' ? (same ? .75 : .92) : (same ? 1.3 : 1.08);
+  u.rate = SET.calm ? (who === 'boy' ? .86 : .9) : 1;
+  u.volume = SET.vol;
+  TTS.speak(u);
+}
+function hush(){ if (TTS) TTS.cancel(); }
+function unlockTTS(){ if (!TTS) return; const u = new SpeechSynthesisUtterance(' '); u.volume = 0; TTS.speak(u); }
+
+let setOpen = false;
+function syncSettingsUI(){
+  const v = $('s-voice'); v.setAttribute('aria-pressed', SET.voice); v.textContent = SET.voice ? 'On' : 'Off';
+  $('s-vol').value = SET.vol;
+  document.querySelectorAll('.seg').forEach(seg => seg.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(SET[seg.dataset.k]) === b.dataset.v)));
+  $('mute').textContent = SET.voice ? '🔊 Voices' : '🔇 Muted';
+  $('novoice').style.display = TTS ? 'none' : 'block';
+}
+function openSettings(){ setOpen = true; syncSettingsUI(); $('settings').classList.add('on'); }
+function closeSettings(){ setOpen = false; $('settings').classList.remove('on'); }
+$('menuSettings').onclick = openSettings; $('setbtn').onclick = openSettings; $('s-close').onclick = closeSettings;
+$('settings').addEventListener('pointerdown', e => { if (e.target.id === 'settings') closeSettings(); });
+$('s-voice').onclick = () => { SET.voice = !SET.voice; if (!SET.voice) hush(); saveSet(); syncSettingsUI(); };
+$('s-vol').oninput = e => { SET.vol = +e.target.value; saveSet(); };
+document.querySelectorAll('.seg button').forEach(b => b.onclick = () => {
+  const k = b.parentElement.dataset.k; SET[k] = k === 'calm' ? b.dataset.v === 'true' : b.dataset.v; saveSet(); syncSettingsUI();
+});
+$('s-test').onclick = () => { if (!SET.voice) { SET.voice = true; saveSet(); syncSettingsUI(); } speak('boy', "Hey. It's me. I'll always come find you."); speak('girl', "And I'll always be waiting.", true); };
+$('mute').onclick = e => {
+  e.stopPropagation(); SET.voice = !SET.voice; saveSet(); syncSettingsUI();
+  if (!SET.voice) hush(); else if (story && story.step && story.step.say) speak(story.step.say[0], story.step.say[1]);
+};
+$('mute').addEventListener('pointerdown', e => e.stopPropagation());
+addEventListener('keydown', e => { if (e.key === 'Escape' && setOpen) closeSettings(); });
+syncSettingsUI();
 
 /* ---------- map ---------- */
 const mapc = $('mapc'), mg = mapc.getContext('2d');
@@ -611,8 +693,8 @@ let playing = false, last = 0, menuBg = 'boy';
 function loop(ts){
   const dt = Math.min(.05, (ts - last) / 1000 || 0); last = ts; time += dt;
   const blocked = document.body.classList.contains('touch') && innerHeight > innerWidth;
-  if (story){ if (!blocked) storyUpdate(dt); }
-  else if (playing && !blocked && !mapOpen) update(dt);
+  if (story){ if (!blocked && !setOpen) storyUpdate(dt); }
+  else if (playing && !blocked && !mapOpen && !setOpen) update(dt);
   else if (!playing){ P.x += 18 * dt; if (P.x > WORLD_W - 300) P.x = 80; P.speed = 0; P.t += dt * .35; }
   draw();
   if (mapOpen) drawMap();
@@ -638,12 +720,13 @@ document.querySelectorAll('.pick').forEach(b => b.onclick = () => {
   buildWorld(choice); P.x = 80;
 });
 $('go').onclick = async () => {
+  unlockTTS();
   show(null); document.body.classList.add('playing');
   startStory(choice);
   if (isTouch){ try { await document.documentElement.requestFullscreen?.(); await screen.orientation?.lock?.('landscape'); } catch(e){} }
 };
 $('quit').onclick = () => {
-  closeMap(); playing = false; story = null; dlg.classList.remove('on'); $('skip').classList.remove('on'); cardEl.style.opacity = 0; setFade(0); camp.lantern = false; camp.wood = false;
+  hush(); closeSettings(); closeMap(); playing = false; story = null; dlg.classList.remove('on'); $('skip').classList.remove('on'); $('mute').classList.remove('on'); cardEl.style.opacity = 0; setFade(0); camp.lantern = false; camp.wood = false;
   document.body.classList.remove('playing'); $('hud').classList.remove('on'); stickX = 0;
   try { document.fullscreenElement && document.exitFullscreen(); } catch(e){}
   show('menu');
