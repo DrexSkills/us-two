@@ -47,9 +47,12 @@ input{font:inherit;font-size:20px;background:#0a1214;color:var(--paper);border:4
 #title{position:absolute;left:0;right:0;top:34%;text-align:center;font-size:clamp(26px,5vw,44px);color:var(--paper);text-shadow:3px 3px 0 #000;opacity:0;transition:opacity .9s}
 #title small{display:block;font-size:.5em;color:var(--rose);margin-bottom:4px}
 #keys{position:absolute;bottom:calc(env(safe-area-inset-bottom,0px) + 14px);left:0;right:0;font-size:16px;opacity:.65}
-#stick{position:absolute;left:calc(env(safe-area-inset-left,0px) + 34px);bottom:calc(env(safe-area-inset-bottom,0px) + 30px);width:130px;height:130px;border-radius:50%;
+#stick{position:absolute;left:calc(env(safe-area-inset-left,0px) + 34px);bottom:calc(env(safe-area-inset-bottom,0px) + 30px);width:var(--js);height:var(--js);border-radius:50%;
   background:rgba(239,227,207,.08);border:4px solid rgba(239,227,207,.35);pointer-events:auto;display:none;touch-action:none}
-#knob{position:absolute;left:50%;top:50%;width:60px;height:60px;margin:-30px 0 0 -30px;border-radius:50%;background:rgba(240,185,171,.85);border:4px solid #5a2f33}
+#knob{position:absolute;left:50%;top:50%;width:calc(var(--js) * .44);height:calc(var(--js) * .44);margin:calc(var(--js) * -.22) 0 0 calc(var(--js) * -.22);border-radius:50%;background:rgba(240,185,171,.85);border:4px solid #5a2f33}
+:root{--js:clamp(108px,30vmin,140px)}
+body.js-small{--js:clamp(90px,24vmin,112px)}
+body.js-large{--js:clamp(128px,38vmin,170px)}
 .touch #stick{display:block}.touch #keys{display:none}
 #fade{position:fixed;inset:0;z-index:6;background:#05090b;opacity:0;pointer-events:none;transition:opacity .9s;display:flex;align-items:center;justify-content:center}
 #card{font-size:clamp(22px,4vw,34px);color:var(--paper);opacity:0;transition:opacity .6s;padding:20px;text-align:center}
@@ -228,6 +231,7 @@ input[type=range]{width:150px;accent-color:var(--ember);padding:0;border:0;backg
   <div class="row"><span>Text speed</span><div class="seg" data-k="text"><button data-v="slow">Slow</button><button data-v="normal">Normal</button><button data-v="fast">Fast</button></div></div>
   <div class="row"><span>Music</span><div class="seg" data-k="music"><button data-v="off">Off</button><button data-v="low">Low</button><button data-v="high">High</button></div></div>
   <div class="row"><span>Sounds</span><div class="seg" data-k="sfx"><button data-v="off">Off</button><button data-v="on">On</button></div></div>
+  <div class="row"><span>Joystick size</span><div class="seg" data-k="js"><button data-v="small">Small</button><button data-v="medium">Medium</button><button data-v="large">Large</button></div></div>
   <div class="row" id="vibRow"><span>Vibration</span><div class="seg" data-k="vib"><button data-v="off">Off</button><button data-v="on">On</button></div></div>
   <div class="acts"><button class="btn ghost" id="s-how">How to play</button><button class="btn" id="s-close">Done</button></div>
 </div></div>
@@ -650,10 +654,12 @@ function showTitle(small, big){
 }
 
 /* ---------- settings ---------- */
-const SET = { text: 'normal', music: 'high', sfx: 'on', vib: 'on' };
+const SET = { text: 'normal', music: 'high', sfx: 'on', vib: 'on', js: 'medium' };
 try { const saved = JSON.parse(localStorage.getItem('us2-settings') || '{}'); for (const k in SET) if (typeof saved[k] === 'string') SET[k] = saved[k]; } catch (e) {}
-function saveSet(){ try { localStorage.setItem('us2-settings', JSON.stringify(SET)); } catch (e) {} }
+function applyJs(){ document.body.classList.toggle('js-small', SET.js === 'small'); document.body.classList.toggle('js-large', SET.js === 'large'); }
+function saveSet(){ applyJs(); try { localStorage.setItem('us2-settings', JSON.stringify(SET)); } catch (e) {} }
 const TEXT_SPEED = { slow: 22, normal: 40, fast: 85 };
+applyJs();
 let setOpen = false;
 function syncSettingsUI(){
   document.querySelectorAll('.seg').forEach(seg => seg.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(SET[seg.dataset.k]) === b.dataset.v)));
