@@ -12,6 +12,9 @@ A cooperative 16-bit pixel-art adventure for couples. One player is the Boy, sea
 - Walking and running
 - Full-screen parchment map with areas, fog over unexplored parts, and a "You" marker (Map button or M key)
 - Controls: on-screen joystick on phones, ← → / A D + Shift on desktop
+- Objectives, a clue notebook and hearts for both players
+- Cross-player puzzles: she finds the gate symbol he needs, he finds the stone color order she needs
+- Creatures: Ragged Bear and Shadow Stalker (his side), Forest Wraith and the Hollow (her side). Hide in tall grass, or stay completely still when the Hollow appears
 - Settings: text speed (saved on the device)
 - Asks phone players to rotate to landscape
 
