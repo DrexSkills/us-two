@@ -43,7 +43,7 @@ input{font:inherit;font-size:20px;background:#0a1214;color:var(--paper);border:4
 #hud.on{display:block}
 .who{position:absolute;top:calc(env(safe-area-inset-top,0px) + 12px);left:calc(env(safe-area-inset-left,0px) + 14px);font-size:18px;background:rgba(8,16,19,.7);padding:6px 12px;border:3px solid var(--line)}
 .hbtns{position:absolute;top:calc(env(safe-area-inset-top,0px) + 10px);right:calc(env(safe-area-inset-right,0px) + 12px);display:flex;gap:8px}
-#quit,#mapbtn,#setbtn,#cluebtn{pointer-events:auto;font:inherit;font-size:16px;color:var(--paper);background:rgba(8,16,19,.7);border:3px solid var(--line);min-width:48px;min-height:44px;padding:6px 12px;cursor:pointer}
+#quit,#mapbtn,#setbtn,#cluebtn,#chatbtn{pointer-events:auto;font:inherit;font-size:16px;color:var(--paper);background:rgba(8,16,19,.7);border:3px solid var(--line);min-width:48px;min-height:44px;padding:6px 12px;cursor:pointer}
 #title{position:absolute;left:0;right:0;top:34%;text-align:center;font-size:clamp(26px,5vw,44px);color:var(--paper);text-shadow:3px 3px 0 #000;opacity:0;transition:opacity .9s}
 #title small{display:block;font-size:.5em;color:var(--rose);margin-bottom:4px}
 #keys{position:absolute;bottom:calc(env(safe-area-inset-bottom,0px) + 14px);left:0;right:0;font-size:16px;opacity:.65}
@@ -100,6 +100,31 @@ input[type=range]{width:150px;accent-color:var(--ember);padding:0;border:0;backg
 .chs{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .chs button{font:inherit;font-size:30px;min-height:64px;color:var(--paper);background:#0a1214;border:3px solid var(--line);cursor:pointer;letter-spacing:6px}
 .chs button:active{background:#2b3c3a}
+.or{opacity:.6;font-size:16px}
+.joinrow{display:flex;gap:8px;align-items:stretch}
+#codeIn{font:inherit;font-size:24px;letter-spacing:3px;text-transform:uppercase;width:190px;text-align:center;background:#0a1214;color:var(--paper);border:4px solid var(--line);padding:8px}
+#joinBtn{min-width:110px}
+.err{color:#ff8a9a;font-size:17px;min-height:22px;margin:0}
+.small{font-size:16px;opacity:.8;margin:0;max-width:420px;line-height:1.4}
+#roomInfo{display:none;flex-direction:column;align-items:center;gap:4px}
+.net #roomInfo{display:flex}
+.bigcode{font-size:34px;letter-spacing:4px;color:var(--ember);background:#0a1214;border:4px dashed var(--line);padding:4px 16px;cursor:pointer}
+#pstat{font-size:17px}
+#pstat.here{color:#9fe08a}
+.pick .taken{display:none;color:#ff8a9a;font-size:14px}
+.pick[disabled]{opacity:.45;cursor:not-allowed}
+.pick[disabled] .taken{display:block}
+#chatbtn{display:none}
+.netplay #chatbtn{display:inline-block}
+#chat{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(4,8,10,.72);z-index:30;padding:16px}
+#chat.on{display:flex}
+#chatlog{max-height:120px;overflow-y:auto;display:flex;flex-direction:column;gap:4px;margin:4px 0 10px;font-size:16px}
+#chatlog .me{color:var(--ember)} #chatlog .them{color:var(--rose)}
+.quick{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.quick button{font:inherit;font-size:16px;min-height:44px;color:var(--paper);background:#0a1214;border:3px solid var(--line);cursor:pointer}
+#chatIn{font:inherit;font-size:18px;flex:1;min-width:0;background:#0a1214;color:var(--paper);border:3px solid var(--line);padding:8px}
+#toast{position:absolute;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 46px);transform:translateX(-50%);max-width:70vw;background:rgba(8,16,19,.9);border:3px solid var(--rose);padding:8px 14px;font-size:17px;opacity:0;transition:opacity .3s;pointer-events:none;text-align:center}
+#toast.on{opacity:1;pointer-events:auto;cursor:pointer}
 #rotate{position:fixed;inset:0;z-index:20;background:var(--night);display:none;flex-direction:column;align-items:center;justify-content:center;gap:22px;padding:30px;text-align:center}
 #rotate p{font-size:22px;margin:0;max-width:280px;line-height:1.4}
 .phone{width:54px;height:92px;border:5px solid var(--paper);border-radius:8px;position:relative;animation:turn 2.2s ease-in-out infinite}
@@ -119,11 +144,29 @@ input[type=range]{width:150px;accent-color:var(--ember);padding:0;border:0;backg
   <button class="link" id="menuSettings">Settings</button>
 </section>
 
+<section id="mode" class="screen">
+  <h2>How are you playing?</h2>
+  <button class="btn" id="together">Play together</button>
+  <p class="small">Each of you on your own phone, connected with a room code.</p>
+  <button class="btn ghost" id="solo">Play on this phone</button>
+  <button class="link" id="modeBack">Back</button>
+</section>
+
+<section id="room" class="screen">
+  <h2>Play together</h2>
+  <button class="btn" id="createBtn">Create a game</button>
+  <span class="or">or join your partner's game</span>
+  <div class="joinrow"><input id="codeIn" placeholder="US2-0000" maxlength="8" autocomplete="off" inputmode="text" aria-label="Room code"><button class="btn" id="joinBtn">Join</button></div>
+  <p class="err" id="roomErr"></p>
+  <button class="link" id="roomBack">Back</button>
+</section>
+
 <section id="setup" class="screen">
+  <div id="roomInfo"><span class="small">Your room code (tap to copy)</span><span class="bigcode" id="bigcode"></span><span id="pstat">Waiting for your partner to join…</span></div>
   <h2>Who are you playing?</h2>
   <div class="picks">
-    <button class="pick" data-p="boy" aria-pressed="false"><div class="spr" id="pv-boy"></div><b>The Boy</b><small>Searches the forest</small></button>
-    <button class="pick" data-p="girl" aria-pressed="false"><div class="spr" id="pv-girl"></div><b>The Girl</b><small>Trapped deep inside</small></button>
+    <button class="pick" data-p="boy" aria-pressed="false"><div class="spr" id="pv-boy"></div><b>The Boy</b><small>Searches the forest</small><span class="taken">Your partner picked him</span></button>
+    <button class="pick" data-p="girl" aria-pressed="false"><div class="spr" id="pv-girl"></div><b>The Girl</b><small>Trapped deep inside</small><span class="taken">Your partner picked her</span></button>
   </div>
   <button class="btn" id="go" disabled>Enter the forest</button>
   <button class="link" id="back">Back</button>
@@ -131,9 +174,10 @@ input[type=range]{width:150px;accent-color:var(--ember);padding:0;border:0;backg
 
 <div id="hud">
   <div class="who" id="who"></div>
+  <div id="toast"></div>
   <div id="stat"><span id="hearts"></span><span id="obj"></span></div>
   <button id="act" aria-label="Interact">✋<br><span id="actlbl">Look</span></button>
-  <div class="hbtns"><button id="cluebtn" aria-label="Clue notebook">📜 0</button><button id="mapbtn" aria-label="Open map">🗺 Map</button><button id="setbtn" aria-label="Settings">⚙</button><button id="quit" aria-label="Back to menu">Menu</button></div>
+  <div class="hbtns"><button id="chatbtn" aria-label="Talk to your partner">💬</button><button id="cluebtn" aria-label="Clue notebook">📜 0</button><button id="mapbtn" aria-label="Open map">🗺 Map</button><button id="setbtn" aria-label="Settings">⚙</button><button id="quit" aria-label="Back to menu">Menu</button></div>
   <div id="title"></div>
   <div id="keys">Walk with ← → or A / D · hold Shift to run · E to look · M for map</div>
   <div id="stick"><div id="knob"></div></div>
@@ -142,6 +186,11 @@ input[type=range]{width:150px;accent-color:var(--ember);padding:0;border:0;backg
 <div id="map" role="dialog" aria-label="Map"><canvas id="mapc" width="640" height="300"></canvas><button class="btn" id="mapclose">Close map</button></div>
 <div id="notes" role="dialog" aria-label="Clue notebook"><div class="panel"><h2>Clue notebook</h2><div id="notelist"></div><div class="acts"><button class="btn" id="n-close">Close</button></div></div></div>
 <div id="choice" role="dialog" aria-label="Gate lock"><div class="panel"><h2>The old gate</h2><p class="ctext">Three stone tiles can be turned. Which symbols open the gate?</p><div class="chs" id="chs"></div><div class="acts"><button class="btn ghost" id="c-close">Step back</button></div></div></div>
+<div id="chat" role="dialog" aria-label="Messages"><div class="panel"><h2 id="chatTitle">Message</h2>
+  <div id="chatlog"></div>
+  <div class="quick"><button>I found something!</button><button>What do you see?</button><button>I'm stuck, help</button><button>Wait for me</button><button>Almost there!</button><button>❤️</button></div>
+  <div class="joinrow"><input id="chatIn" maxlength="120" placeholder="Type a message…" autocomplete="off"><button class="btn" id="chatSend" style="min-width:90px">Send</button></div>
+  <div class="acts"><button class="btn ghost" id="chatClose">Close</button></div></div></div>
 <div id="fade"><div id="card"></div></div>
 <div id="dlg"><div id="spk"></div><div id="txt"></div><div id="nxt">Tap to continue ▼</div></div>
 <button id="skip">Skip story</button>
@@ -615,12 +664,13 @@ function msgAdvance(){
 
 function setStep(n){
   if (n <= Q.step) return;
-  Q.step = n; const o = $('obj'); o.textContent = OBJ[W.who][n];
+  Q.step = n; netSend('step', { n }); const o = $('obj'); o.textContent = OBJ[W.who][n];
   o.classList.remove('pulse'); void o.offsetWidth; o.classList.add('pulse');
 }
 function addClue(t, x){
   if (Q.clues.some(c => c.t === t)) return;
   Q.clues.push({ t, x }); $('cluebtn').textContent = `📜 ${Q.clues.length}`;
+  netSend('clue', { t });
 }
 function hudHearts(){ $('hearts').textContent = '♥'.repeat(Q.hearts) + '♡'.repeat(3 - Q.hearts); }
 
@@ -730,7 +780,7 @@ function closeNotes(){ notesOpen = false; $('notes').classList.remove('on'); }
 $('cluebtn').onclick = openNotes; $('n-close').onclick = closeNotes;
 $('notes').addEventListener('pointerdown', e => { if (e.target.id === 'notes') closeNotes(); });
 
-function paused(){ return mapOpen || setOpen || notesOpen || choiceOpen || !!msg; }
+function paused(){ return mapOpen || setOpen || notesOpen || choiceOpen || (typeof chatOpen !== 'undefined' && chatOpen) || !!msg; }
 
 function interact(){ if (Q.near && !paused()) Q.near.use(); }
 $('act').onclick = interact;
@@ -1015,25 +1065,198 @@ function preview(el, k){
 }
 preview($('pv-boy'), 'bi'); preview($('pv-girl'), 'gi');
 
-$('start').onclick = () => show('setup');
-$('back').onclick = () => show('menu');
+$('start').onclick = () => show('mode');
+$('back').onclick = () => { if (NET.on){ leaveRoom(); show('room'); } else show('mode'); };
 document.querySelectorAll('.pick').forEach(b => b.onclick = () => {
+  if (NET.on) return claimRole(b.dataset.p);
   choice = b.dataset.p;
   document.querySelectorAll('.pick').forEach(x => x.setAttribute('aria-pressed', x === b));
   $('go').disabled = false;
   buildWorld(choice); P.x = 80;
 });
 $('go').onclick = async () => {
+  if (NET.on) return setReady();
   show(null); document.body.classList.add('playing');
   startStory(choice);
   if (isTouch){ try { await document.documentElement.requestFullscreen?.(); await screen.orientation?.lock?.('landscape'); } catch(e){} }
 };
 $('quit').onclick = () => {
-  closeSettings(); closeMap(); closeNotes(); closeChoice(); msg = null; $('act').classList.remove('show'); playing = false; story = null; dlg.classList.remove('on'); $('skip').classList.remove('on'); cardEl.style.opacity = 0; setFade(0); camp.lantern = false; camp.wood = false;
+  closeSettings(); closeMap(); closeNotes(); closeChoice(); closeChat(); msg = null; $('act').classList.remove('show'); playing = false; story = null; dlg.classList.remove('on'); $('skip').classList.remove('on'); cardEl.style.opacity = 0; setFade(0); camp.lantern = false; camp.wood = false;
   document.body.classList.remove('playing'); $('hud').classList.remove('on'); stickX = 0;
   try { document.fullscreenElement && document.exitFullscreen(); } catch(e){}
+  leaveRoom();
   show('menu');
 };
+
+/* ---------- multiplayer: room codes over Supabase Realtime ---------- */
+const SB_URL = 'https://ihbblnbqjzdewiopqmxd.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImloYmJsbmJxanpkZXdpb3BxbXhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAyODI2NTQsImV4cCI6MjEwNTg1ODY1NH0.7n7GBT2T-BZEId3iMEVOuhSTMeDULB_cTpmTa7IyHMQ';
+const NET = { sb: null, on: false, code: null, role: null, room: null, ch: null, here: false, started: false, me: Math.random().toString(36).slice(2) };
+const other = r => r === 'boy' ? 'girl' : 'boy';
+const pron = r => r === 'girl' ? 'She' : 'He';
+function loadSB(){
+  return new Promise((res, rej) => {
+    if (window.supabase) return res();
+    const sc = document.createElement('script');
+    sc.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js';
+    sc.onload = res; sc.onerror = () => rej(new Error('load')); document.head.appendChild(sc);
+  });
+}
+async function sb(){
+  if (!NET.sb){ await loadSB(); NET.sb = window.supabase.createClient(SB_URL, SB_KEY, { auth: { persistSession: false } }); }
+  return NET.sb;
+}
+const roomErr = t => { $('roomErr').textContent = t; };
+function netFail(e){ console.warn(e); roomErr("Couldn't connect. Check your internet and try again."); }
+function normCode(v){ const d = (v || '').replace(/\D/g, '').slice(-4); return d.length === 4 ? 'US2-' + d : null; }
+
+$('modeBack').onclick = () => show('menu');
+$('solo').onclick = () => { NET.on = false; document.body.classList.remove('net'); show('setup'); };
+$('together').onclick = () => { roomErr(''); show('room'); };
+$('roomBack').onclick = () => show('mode');
+$('createBtn').onclick = async () => {
+  roomErr('Creating…'); $('createBtn').disabled = true;
+  try {
+    const c = await sb();
+    for (let i = 0; i < 6; i++){
+      const code = 'US2-' + (1000 + Math.floor(Math.random() * 9000));
+      const { error } = await c.from('us2_rooms').insert({ code });
+      if (!error){ roomErr(''); return enterRoom(code, { code }); }
+      if (error.code !== '23505') throw error;
+    }
+    roomErr('Busy right now, try again.');
+  } catch(e){ netFail(e); } finally { $('createBtn').disabled = false; }
+};
+$('joinBtn').onclick = async () => {
+  const code = normCode($('codeIn').value);
+  if (!code) return roomErr('Type the 4 numbers from your partner, like US2-4821.');
+  roomErr('Joining…');
+  try {
+    const c = await sb();
+    const { data, error } = await c.from('us2_rooms').select('*').eq('code', code).maybeSingle();
+    if (error) throw error;
+    if (!data) return roomErr('No game with that code. Check it and try again.');
+    if (data.boy_joined && data.girl_joined) return roomErr('That game already has two players.');
+    roomErr(''); enterRoom(code, data);
+  } catch(e){ netFail(e); }
+};
+$('codeIn').addEventListener('keydown', e => { if (e.key === 'Enter') $('joinBtn').click(); });
+$('bigcode').onclick = () => { try { navigator.clipboard.writeText(NET.code); $('bigcode').textContent = 'Copied!'; setTimeout(() => $('bigcode').textContent = NET.code, 900); } catch(e){} };
+
+async function enterRoom(code, data){
+  Object.assign(NET, { on: true, code, role: null, room: data, here: false, started: false });
+  document.body.classList.add('net');
+  $('bigcode').textContent = code;
+  document.querySelectorAll('.pick').forEach(x => x.setAttribute('aria-pressed', 'false'));
+  show('setup'); renderRoom();
+  const c = await sb();
+  NET.ch = c.channel('us2-' + code, { config: { presence: { key: NET.me } } })
+    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'us2_rooms', filter: 'code=eq.' + code }, p => { NET.room = p.new; renderRoom(); checkStart(); })
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'us2_events', filter: 'code=eq.' + code }, p => onNetEvent(p.new))
+    .on('presence', { event: 'sync' }, () => {
+      const was = NET.here; NET.here = Object.keys(NET.ch.presenceState()).length >= 2;
+      renderRoom();
+      if (playing && was && !NET.here) toast('Your partner lost connection…');
+      if (playing && !was && NET.here) toast('Your partner is back ♥');
+    })
+    .subscribe(async st => {
+      if (st === 'SUBSCRIBED'){
+        await NET.ch.track({ at: Date.now() });
+        const { data: fresh } = await c.from('us2_rooms').select('*').eq('code', code).maybeSingle();
+        if (fresh){ NET.room = fresh; renderRoom(); }
+      }
+    });
+}
+function renderRoom(){
+  if (!NET.on) return;
+  const r = NET.room || {};
+  document.querySelectorAll('.pick').forEach(b => {
+    const p = b.dataset.p;
+    b.disabled = !!r[p + '_joined'] && NET.role !== p;
+    b.setAttribute('aria-pressed', NET.role === p);
+  });
+  const pst = $('pstat');
+  pst.classList.toggle('here', NET.here);
+  pst.textContent = NET.here ? 'Your partner is here ♥' : 'Waiting for your partner to join…';
+  const go = $('go'), both = r.boy_joined && r.girl_joined, mine = NET.role && r[NET.role + '_ready'];
+  go.disabled = !NET.role || !both || mine;
+  go.textContent = !NET.role ? 'Pick who you are' : !both ? 'Waiting for your partner to pick…' : mine ? 'Waiting for your partner…' : 'Enter the forest together';
+}
+async function claimRole(role){
+  if (NET.role === role) return;
+  try {
+    const c = await sb();
+    const { data, error } = await c.from('us2_rooms').update({ [role + '_joined']: true }).eq('code', NET.code).eq(role + '_joined', false).select();
+    if (error) throw error;
+    if (!data || !data.length) return;  // partner took it first
+    if (NET.role){ const old = NET.role; const { data: d2 } = await c.from('us2_rooms').update({ [old + '_joined']: false, [old + '_ready']: false }).eq('code', NET.code).select(); if (d2 && d2[0]) NET.room = d2[0]; }
+    else NET.room = data[0];
+    NET.role = role; choice = role; buildWorld(role); P.x = 80;
+    renderRoom();
+  } catch(e){ console.warn(e); }
+}
+async function setReady(){
+  if (!NET.role) return;
+  $('go').disabled = true;
+  try {
+    const c = await sb();
+    const { data } = await c.from('us2_rooms').update({ [NET.role + '_ready']: true }).eq('code', NET.code).select();
+    if (data && data[0]) NET.room = data[0];
+    renderRoom(); checkStart();
+  } catch(e){ console.warn(e); renderRoom(); }
+}
+function checkStart(){
+  const r = NET.room || {};
+  if (NET.started || !NET.role || !(r.boy_ready && r.girl_ready)) return;
+  NET.started = true;
+  show(null); document.body.classList.add('playing', 'netplay');
+  $('chatTitle').textContent = 'Message ' + (NET.role === 'boy' ? 'her' : 'him');
+  startStory(NET.role);
+  if (isTouch){ try { document.documentElement.requestFullscreen?.().then(() => screen.orientation?.lock?.('landscape')).catch(() => {}); } catch(e){} }
+}
+async function leaveRoom(){
+  if (!NET.on) return;
+  const { code, role, ch } = NET;
+  Object.assign(NET, { on: false, code: null, role: null, room: null, ch: null, here: false, started: false });
+  document.body.classList.remove('net', 'netplay');
+  $('chatlog').innerHTML = '';
+  document.querySelectorAll('.pick').forEach(b => { b.disabled = false; b.setAttribute('aria-pressed', 'false'); });
+  $('go').textContent = 'Enter the forest'; $('go').disabled = true;
+  try {
+    const c = await sb();
+    if (role) await c.from('us2_rooms').update({ [role + '_joined']: false, [role + '_ready']: false }).eq('code', code);
+    if (ch) c.removeChannel(ch);
+  } catch(e){}
+}
+addEventListener('pagehide', () => { if (NET.on && NET.role){ try { fetch(`${SB_URL}/rest/v1/us2_rooms?code=eq.${NET.code}`, { method: 'PATCH', keepalive: true, headers: { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' }, body: JSON.stringify({ [NET.role + '_joined']: false, [NET.role + '_ready']: false }) }); } catch(e){} } });
+
+/* events between the two phones */
+async function netSend(kind, payload){
+  if (!NET.on || !NET.role || !NET.started) return;
+  try { const c = await sb(); await c.from('us2_events').insert({ code: NET.code, sender: NET.role, kind, payload }); } catch(e){ console.warn(e); }
+}
+function onNetEvent(e){
+  if (!e || e.sender === NET.role) return;
+  const who = pron(e.sender), pl = e.payload || {};
+  if (e.kind === 'chat'){ logChat(who, pl.text, 'them'); toast(`💬 ${who}: ${pl.text}`); }
+  else if (e.kind === 'clue') toast(`📜 ${who} found a clue: ${pl.t}`);
+  else if (e.kind === 'step' && OBJ[e.sender][pl.n]) toast(`${who} is now: ${OBJ[e.sender][pl.n]}`);
+}
+let toastT = 0;
+function toast(t){ const el = $('toast'); el.textContent = t; el.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => el.classList.remove('on'), 4500); }
+$('toast').onclick = () => { $('toast').classList.remove('on'); openChat(); };
+
+/* chat panel */
+let chatOpen = false;
+function logChat(who, text, cls){ const d = document.createElement('div'); d.className = cls; d.textContent = `${who}: ${text}`; const l = $('chatlog'); l.appendChild(d); l.scrollTop = l.scrollHeight; }
+function openChat(){ if (!NET.on || !playing) return; chatOpen = true; $('chat').classList.add('on'); }
+function closeChat(){ chatOpen = false; $('chat').classList.remove('on'); }
+function sendChat(text){ text = (text || '').trim().slice(0, 120); if (!text) return; logChat('You', text, 'me'); netSend('chat', { text }); $('chatIn').value = ''; closeChat(); }
+$('chatbtn').onclick = openChat; $('chatClose').onclick = closeChat;
+$('chatSend').onclick = () => sendChat($('chatIn').value);
+$('chatIn').addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Enter') sendChat($('chatIn').value); if (e.key === 'Escape') closeChat(); });
+document.querySelectorAll('.quick button').forEach(b => b.onclick = () => sendChat(b.textContent));
+$('chat').addEventListener('pointerdown', e => { if (e.target.id === 'chat') closeChat(); });
 
 buildWorld('boy');
 requestAnimationFrame(loop);
