@@ -1336,7 +1336,12 @@ async function sb(){
   return NET.sb;
 }
 const roomErr = t => { $('roomErr').textContent = t; };
-function netFail(e){ console.warn(e); roomErr("Couldn't connect. Check your internet and try again."); }
+function netFail(e){
+  console.warn(e);
+  if (!/github\.io$/.test(location.hostname)) return roomErr('Play together only works at drexskills.github.io/us-two. Open that link on both phones.');
+  if (e && e.message === 'load') return roomErr("Couldn't load the online part. Check your internet and try again.");
+  roomErr("Couldn't reach the game server. Try again in a moment." + (e && e.message ? ' (' + e.message + ')' : ''));
+}
 function normCode(v){ const d = (v || '').replace(/\D/g, '').slice(-4); return d.length === 4 ? 'US2-' + d : null; }
 
 $('modeBack').onclick = () => show('menu');
