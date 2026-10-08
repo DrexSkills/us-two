@@ -123,8 +123,23 @@ input[type=range]{width:150px;accent-color:var(--ember);padding:0;border:0;backg
 .quick{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
 .quick button{font:inherit;font-size:16px;min-height:44px;color:var(--paper);background:#0a1214;border:3px solid var(--line);cursor:pointer}
 #chatIn{font:inherit;font-size:18px;flex:1;min-width:0;background:#0a1214;color:var(--paper);border:3px solid var(--line);padding:8px}
-#toast{position:absolute;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 46px);transform:translateX(-50%);max-width:70vw;background:rgba(8,16,19,.9);border:3px solid var(--rose);padding:8px 14px;font-size:17px;opacity:0;transition:opacity .3s;pointer-events:none;text-align:center}
+#toast{position:absolute;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 98px);transform:translateX(-50%);max-width:70vw;background:rgba(8,16,19,.9);border:3px solid var(--rose);padding:8px 14px;font-size:17px;opacity:0;transition:opacity .3s;pointer-events:none;text-align:center}
 #toast.on{opacity:1;pointer-events:auto;cursor:pointer}
+#tip{position:absolute;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 46px);transform:translateX(-50%);max-width:62vw;background:rgba(242,179,80,.96);color:var(--ink);border:3px solid #000;padding:7px 14px;font-size:17px;font-weight:600;line-height:1.3;text-align:center;opacity:0;transition:opacity .35s;pointer-events:none}
+#tip.on{opacity:1}
+.playing #s-how{display:none}
+#howto{gap:12px;background:rgba(4,8,10,.72)}
+.hcard{max-width:580px;width:100%;background:#0e1917;border:4px solid var(--line);padding:14px 18px;display:flex;flex-direction:column;align-items:center;gap:8px}
+.hart{min-height:64px;display:flex;align-items:flex-end;justify-content:center;gap:14px;font-size:46px;line-height:1;color:#e2475b}
+.hart .sp{image-rendering:pixelated;background-repeat:no-repeat}
+#hTitle{margin:0}
+#hText{font-size:19px;line-height:1.45;margin:0}
+#hEx{font-size:17px;margin:0;color:var(--ember);display:none}
+.hdots{display:flex;gap:8px}
+.hdots i{width:10px;height:10px;background:#2b3c3a;display:block}
+.hdots i.on{background:var(--rose)}
+.hnav{display:flex;gap:12px}
+.hnav .btn{min-width:150px}
 #rotate{position:fixed;inset:0;z-index:20;background:var(--night);display:none;flex-direction:column;align-items:center;justify-content:center;gap:22px;padding:30px;text-align:center}
 #rotate p{font-size:22px;margin:0;max-width:280px;line-height:1.4}
 .phone{width:54px;height:92px;border:5px solid var(--paper);border-radius:8px;position:relative;animation:turn 2.2s ease-in-out infinite}
@@ -141,7 +156,15 @@ input[type=range]{width:150px;accent-color:var(--ember);padding:0;border:0;backg
   <div><h1>Us Two</h1><span class="heart">♥</span></div>
   <p class="tag">Two players.<br>One adventure.<br>Find each other.</p>
   <button class="btn" id="start">Start</button>
+  <button class="link" id="menuHow">How to play</button>
   <button class="link" id="menuSettings">Settings</button>
+</section>
+
+<section id="howto" class="screen">
+  <div class="hcard"><div class="hart" id="hArt"></div><h2 id="hTitle"></h2><p id="hText"></p><p id="hEx"></p></div>
+  <div class="hdots" id="hDots"></div>
+  <div class="hnav"><button class="btn ghost" id="hPrev">Back</button><button class="btn" id="hNext">Next</button></div>
+  <button class="link" id="hSkip">Skip</button>
 </section>
 
 <section id="mode" class="screen">
@@ -175,6 +198,7 @@ input[type=range]{width:150px;accent-color:var(--ember);padding:0;border:0;backg
 <div id="hud">
   <div class="who" id="who"></div>
   <div id="toast"></div>
+  <div id="tip"></div>
   <div id="stat"><span id="hearts"></span><span id="obj"></span></div>
   <button id="act" aria-label="Interact">✋<br><span id="actlbl">Look</span></button>
   <div class="hbtns"><button id="chatbtn" aria-label="Talk to your partner">💬</button><button id="cluebtn" aria-label="Clue notebook">📜 0</button><button id="mapbtn" aria-label="Open map">🗺 Map</button><button id="setbtn" aria-label="Settings">⚙</button><button id="quit" aria-label="Back to menu">Menu</button></div>
@@ -197,7 +221,10 @@ input[type=range]{width:150px;accent-color:var(--ember);padding:0;border:0;backg
 <div id="settings" role="dialog" aria-label="Settings"><div class="panel">
   <h2>Settings</h2>
   <div class="row"><span>Text speed</span><div class="seg" data-k="text"><button data-v="slow">Slow</button><button data-v="normal">Normal</button><button data-v="fast">Fast</button></div></div>
-  <div class="acts"><button class="btn" id="s-close">Done</button></div>
+  <div class="row"><span>Music</span><div class="seg" data-k="music"><button data-v="off">Off</button><button data-v="low">Low</button><button data-v="high">High</button></div></div>
+  <div class="row"><span>Sounds</span><div class="seg" data-k="sfx"><button data-v="off">Off</button><button data-v="on">On</button></div></div>
+  <div class="row" id="vibRow"><span>Vibration</span><div class="seg" data-k="vib"><button data-v="off">Off</button><button data-v="on">On</button></div></div>
+  <div class="acts"><button class="btn ghost" id="s-how">How to play</button><button class="btn" id="s-close">Done</button></div>
 </div></div>
 <div id="rotate"><div class="phone"></div><p>Turn your phone sideways to play</p></div>
 
@@ -579,7 +606,7 @@ function storyUpdate(dt){
     arrived = false; const d = Math.sign(s.lureTo - st.lure.x); st.lure.x += d * 50 * dt;
     if (Math.sign(s.lureTo - st.lure.x) !== d) st.lure.x = s.lureTo;
   }
-  if (s.say){ if (st.chars < st.full.length){ st.chars = Math.min(st.full.length, st.chars + dt * TEXT_SPEED[SET.text]); txt.textContent = st.full.slice(0, Math.floor(st.chars)); } return; }
+  if (s.say){ if (st.chars < st.full.length){ st.chars = textStep(st.chars, dt, st.full); txt.textContent = st.full.slice(0, Math.floor(st.chars)); } return; }
   if (s.walk && !arrived) return;
   if (st.wait > 0){ st.wait -= dt; if (st.wait > 0) return; }
   if (s.card) cardEl.style.opacity = 0;
@@ -609,6 +636,7 @@ function beginPlay(choice){
   $('who').textContent = choice === 'boy' ? 'He · The Boy' : 'She · The Girl';
   W.explored = P.x; W.zone = -1;
   setupQuest(choice);
+  setTimeout(() => tip('start', (isTouch ? 'Use the joystick to walk.' : 'Walk with ← → or A / D.') + ' Your goal is at the top-left.', 6), 2600);
 }
 let titleTimer = 0;
 function showTitle(small, big){
@@ -617,8 +645,8 @@ function showTitle(small, big){
 }
 
 /* ---------- settings ---------- */
-const SET = { text: 'normal' };
-try { const saved = JSON.parse(localStorage.getItem('us2-settings') || '{}'); if (saved.text) SET.text = saved.text; } catch (e) {}
+const SET = { text: 'normal', music: 'high', sfx: 'on', vib: 'on' };
+try { const saved = JSON.parse(localStorage.getItem('us2-settings') || '{}'); for (const k in SET) if (typeof saved[k] === 'string') SET[k] = saved[k]; } catch (e) {}
 function saveSet(){ try { localStorage.setItem('us2-settings', JSON.stringify(SET)); } catch (e) {} }
 const TEXT_SPEED = { slow: 22, normal: 40, fast: 85 };
 let setOpen = false;
@@ -629,12 +657,12 @@ function openSettings(){ setOpen = true; syncSettingsUI(); $('settings').classLi
 function closeSettings(){ setOpen = false; $('settings').classList.remove('on'); }
 $('menuSettings').onclick = openSettings; $('setbtn').onclick = openSettings; $('s-close').onclick = closeSettings;
 $('settings').addEventListener('pointerdown', e => { if (e.target.id === 'settings') closeSettings(); });
-document.querySelectorAll('.seg button').forEach(b => b.onclick = () => { SET[b.parentElement.dataset.k] = b.dataset.v; saveSet(); syncSettingsUI(); });
+document.querySelectorAll('.seg button').forEach(b => b.onclick = () => { SET[b.parentElement.dataset.k] = b.dataset.v; saveSet(); syncSettingsUI(); applyVol(); if (b.parentElement.dataset.k === 'vib') buzz(60); else sfx('look'); });
 addEventListener('keydown', e => { if (e.key === 'Escape' && setOpen) closeSettings(); });
 syncSettingsUI();
 
 /* ---------- quest: objectives, clues, monsters ---------- */
-const Q = { step: 0, clues: [], hearts: 3, check: 80, flags: {}, seq: [], flash: 0, inv: 0, hollow: null, near: null };
+const Q = { tips: new Set(), step: 0, clues: [], hearts: 3, check: 80, flags: {}, seq: [], flash: 0, inv: 0, hollow: null, near: null };
 const OBJ = {
   boy:  ['Search the camp for clues', 'Follow the fireflies east', 'Get past the Ragged Bear', 'Open the old gate', 'Look inside the chest', 'Keep searching for her… (more soon)'],
   girl: ['Look around', 'Find the glowing stone', 'Cross the Stone Circle', 'Light the stones in the right order', 'Get through the Whispering Pines', 'Wait for him… (more soon)']
@@ -652,7 +680,7 @@ function showMsgLine(){
 }
 function msgUpdate(dt){
   const L = msg.lines[msg.i][1];
-  if (msg.chars < L.length){ msg.chars = Math.min(L.length, msg.chars + dt * TEXT_SPEED[SET.text]); txt.textContent = L.slice(0, Math.floor(msg.chars)); }
+  if (msg.chars < L.length){ msg.chars = textStep(msg.chars, dt, L); txt.textContent = L.slice(0, Math.floor(msg.chars)); }
 }
 function msgAdvance(){
   const L = msg.lines[msg.i][1];
@@ -670,12 +698,14 @@ function setStep(n){
 function addClue(t, x){
   if (Q.clues.some(c => c.t === t)) return;
   Q.clues.push({ t, x }); $('cluebtn').textContent = `📜 ${Q.clues.length}`;
+  sfx('clue'); buzz(40);
+  tip('clue', 'Clue saved in your 📜 notebook. Tell your partner what you found!');
   netSend('clue', { t });
 }
 function hudHearts(){ $('hearts').textContent = '♥'.repeat(Q.hearts) + '♡'.repeat(3 - Q.hearts); }
 
 function setupQuest(who){
-  Object.assign(Q, { step: 0, clues: [], hearts: 3, flags: {}, seq: [], flash: 0, inv: 0, hollow: null, near: null, check: P.x });
+  Object.assign(Q, { tips: new Set(), step: 0, clues: [], hearts: 3, flags: {}, seq: [], flash: 0, inv: 0, hollow: null, near: null, check: P.x });
   $('obj').textContent = OBJ[who][0]; $('cluebtn').textContent = '📜 0'; hudHearts();
   if (who === 'boy'){
     W.objs = [
@@ -741,7 +771,7 @@ function touchStone(c){
       () => addClue('Color stones', 'Green, blue and red stones. They need a special order. Ask him.'));
   }
   if (Q.seq.length === 3){
-    Q.flags.stones = true; W.blocks[0].open = true;
+    Q.flags.stones = true; W.blocks[0].open = true; sfx('solve'); buzz([30, 40, 30, 40, 90]);
     say([['girl', "All three are glowing… and the thorns are pulling back!"], ['girl', "He found the order. We did it together."]], () => setStep(4));
   }
 }
@@ -756,7 +786,7 @@ function openChoice(){
     const b = document.createElement('button'); b.textContent = o;
     b.onclick = () => {
       closeChoice();
-      if (o === ANSWER){ W.blocks[0].open = true; say([['note', 'The tiles click into place. The gate grinds open.'], ['boy', "It worked! She was right."]], () => setStep(4)); }
+      if (o === ANSWER){ W.blocks[0].open = true; sfx('solve'); sfx('gate'); buzz([30, 40, 30, 40, 120]); say([['note', 'The tiles click into place. The gate grinds open.'], ['boy', "It worked! She was right."]], () => setStep(4)); }
       else say([['note', 'The tiles slide back. Nothing happens.'], ['boy', "Wrong one. I need to ask her what she found."]],
         () => addClue('Old gate', 'Needs three symbols. Ask her what she saw.'));
     };
@@ -782,7 +812,7 @@ $('notes').addEventListener('pointerdown', e => { if (e.target.id === 'notes') c
 
 function paused(){ return mapOpen || setOpen || notesOpen || choiceOpen || (typeof chatOpen !== 'undefined' && chatOpen) || !!msg; }
 
-function interact(){ if (Q.near && !paused()) Q.near.use(); }
+function interact(){ if (Q.near && !paused()){ sfx('look'); buzz(15); Q.near.use(); } }
 $('act').onclick = interact;
 addEventListener('keydown', e => {
   const k = e.key.toLowerCase();
@@ -804,7 +834,7 @@ function caught(kind){
     hollow: [['note', 'It saw you move. Everything goes cold and dark…'], ['girl', "I'm back at the edge of the circle. Don't move next time. Not even a little."]]
   }[kind];
   if (Q.hearts <= 0){ Q.hearts = 3; lines.push(['note', 'You catch your breath. Your hearts are restored.']); }
-  hudHearts(); say(lines);
+  hudHearts(); sfx('caught'); buzz([220, 80, 220]); say(lines);
 }
 
 function questUpdate(dt){
@@ -823,7 +853,7 @@ function questUpdate(dt){
   }
   // the Hollow (girl): appears once you enter the Stone Circle
   if (W.who === 'girl'){
-    if (!Q.flags.hollowDone && !Q.hollow && P.x > 1480 && Q.inv <= 0) Q.hollow = { x: Math.min(P.x + 120, 1800), t: 0 };
+    if (!Q.flags.hollowDone && !Q.hollow && P.x > 1480 && Q.inv <= 0) { Q.hollow = { x: Math.min(P.x + 120, 1800), t: 0 }; sfx('hollow'); buzz(450); }
     if (Q.hollow){
       const h = Q.hollow; h.t += dt;
       if (h.t > .9 && Math.abs(P.speed) > 6){ Q.hollow = null; caught('hollow'); }
@@ -831,10 +861,18 @@ function questUpdate(dt){
     }
     if (P.x > 2300) setStep(Q.flags.stones ? 4 : Q.step);
   } else if (P.x > 2450) setStep(3);
+  // danger level for music, vibration and tips
+  let dng = 0;
+  for (const m of W.mons){ const dd = Math.abs(m.x - P.x); if (dd < 260 && Math.sign(P.x - m.x) === m.dir) dng = Math.max(dng, 1 - dd / 260); }
+  if (Q.hollow) dng = 1;
+  AU.tgt = hidden ? dng * .5 : dng;
+  if (dng > .05 && !Q.hollow) tip(hidden ? 'hidden' : 'hide', hidden ? "You're hidden. Wait until it walks past." : 'Something is coming! Get into the tall grass and stand still.');
+  if (dng > .05 && hidden) tip('hidden', "You're hidden. Wait until it walks past.");
   // nearest interactable
   let near = null;
   for (const o of W.objs){ if (Math.abs(o.x - P.x) < 26 && (!near || Math.abs(o.x - P.x) < Math.abs(near.x - P.x))) near = o; }
   Q.near = near;
+  if (near) tip('look', isTouch ? 'Tap the ✋ button to look' : 'Press E to look');
   const act = $('act'); act.classList.toggle('show', !!near && !msg);
   if (near) $('actlbl').textContent = near.label;
 }
@@ -1074,19 +1112,192 @@ document.querySelectorAll('.pick').forEach(b => b.onclick = () => {
   $('go').disabled = false;
   buildWorld(choice); P.x = 80;
 });
-$('go').onclick = async () => {
+$('go').onclick = () => {
   if (NET.on) return setReady();
-  show(null); document.body.classList.add('playing');
-  startStory(choice);
-  if (isTouch){ try { await document.documentElement.requestFullscreen?.(); await screen.orientation?.lock?.('landscape'); } catch(e){} }
+  openHowto(() => enterForest(choice));
 };
+async function enterForest(role){
+  show(null); document.body.classList.add('playing');
+  startStory(role);
+  if (isTouch){ try { await document.documentElement.requestFullscreen?.(); await screen.orientation?.lock?.('landscape'); } catch(e){} }
+}
 $('quit').onclick = () => {
   closeSettings(); closeMap(); closeNotes(); closeChoice(); closeChat(); msg = null; $('act').classList.remove('show'); playing = false; story = null; dlg.classList.remove('on'); $('skip').classList.remove('on'); cardEl.style.opacity = 0; setFade(0); camp.lantern = false; camp.wood = false;
   document.body.classList.remove('playing'); $('hud').classList.remove('on'); stickX = 0;
   try { document.fullscreenElement && document.exitFullscreen(); } catch(e){}
-  leaveRoom();
+  leaveRoom(); AU.tgt = 0; $('tip').classList.remove('on');
   show('menu');
 };
+
+/* ---------- audio: procedural music, sounds, vibration ---------- */
+const AU = { ctx: null, tgt: 0, danger: 0, next: 0, beat: 0 };
+const mf = m => 440 * Math.pow(2, (m - 69) / 12);
+const BEAT = .78;
+const PROG = {
+  boy:  [[57, 60, 64], [53, 57, 60], [48, 52, 55], [55, 59, 62]],   // Am F C G
+  girl: [[50, 53, 57], [46, 50, 53], [43, 46, 50], [45, 49, 52]]    // Dm Bb Gm A
+};
+function audioStart(){
+  try {
+    if (!AU.ctx){
+      const C = window.AudioContext || window.webkitAudioContext; if (!C) return;
+      const c = AU.ctx = new C();
+      AU.out = c.createGain(); AU.out.gain.value = .9; AU.out.connect(c.destination);
+      AU.mus = c.createGain(); AU.sfx = c.createGain(); AU.mus.gain.value = 0;
+      const rv = c.createConvolver(), len = Math.floor(c.sampleRate * 2.6), buf = c.createBuffer(2, len, c.sampleRate);
+      for (let ch = 0; ch < 2; ch++){ const d = buf.getChannelData(ch); for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3); }
+      rv.buffer = buf; AU.rv = c.createGain(); AU.rv.gain.value = .45; AU.rv.connect(rv); rv.connect(AU.out);
+      AU.mus.connect(AU.out); AU.mus.connect(AU.rv); AU.sfx.connect(AU.out);
+      const sr = c.createGain(); sr.gain.value = .25; AU.sfx.connect(sr); sr.connect(AU.rv);
+      // noise buffer (wind + effects)
+      const nb = AU.noise = c.createBuffer(1, c.sampleRate * 2, c.sampleRate), nd = nb.getChannelData(0);
+      for (let i = 0; i < nd.length; i++) nd[i] = Math.random() * 2 - 1;
+      const wn = c.createBufferSource(); wn.buffer = nb; wn.loop = true;
+      const wf = c.createBiquadFilter(); wf.type = 'bandpass'; wf.frequency.value = 380; wf.Q.value = .6;
+      const wg = c.createGain(); wg.gain.value = .045;
+      const lfo = c.createOscillator(), lg = c.createGain(); lfo.frequency.value = .07; lg.gain.value = 220; lfo.connect(lg); lg.connect(wf.frequency); lfo.start();
+      wn.connect(wf); wf.connect(wg); wg.connect(AU.mus); wn.start();
+      // danger drone
+      AU.dr = c.createGain(); AU.dr.gain.value = 0;
+      const df = c.createBiquadFilter(); df.type = 'lowpass'; df.frequency.value = 190; df.connect(AU.dr); AU.dr.connect(AU.mus);
+      [55, 58.4].forEach(f => { const o = c.createOscillator(); o.type = 'sawtooth'; o.frequency.value = f; o.connect(df); o.start(); });
+      AU.next = c.currentTime + .15;
+      setInterval(schedule, 110);
+    }
+    if (AU.ctx.state !== 'running') AU.ctx.resume();
+    applyVol();
+  } catch(e){ console.warn(e); }
+}
+['pointerdown', 'keydown'].forEach(ev => addEventListener(ev, audioStart, { passive: true }));
+document.addEventListener('visibilitychange', () => { if (!AU.ctx) return; document.hidden ? AU.ctx.suspend() : AU.ctx.resume(); });
+function applyVol(){
+  if (!AU.ctx) return; const t = AU.ctx.currentTime;
+  AU.mus.gain.setTargetAtTime(SET.music === 'off' ? 0 : SET.music === 'low' ? .3 : .7, t, .4);
+  AU.sfx.gain.setTargetAtTime(SET.sfx === 'off' ? 0 : .85, t, .05);
+}
+function env(g, t, a, peak, dec){ g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(peak, t + a); g.gain.exponentialRampToValueAtTime(.0001, t + a + dec); }
+function tone(freq, t, dur, { type = 'sine', gain = .1, to = null, dest = AU.sfx, a = .005, pan = 0 } = {}){
+  const c = AU.ctx, o = c.createOscillator(), g = c.createGain();
+  o.type = type; o.frequency.setValueAtTime(freq, t); if (to) o.frequency.exponentialRampToValueAtTime(to, t + dur);
+  env(g, t, a, gain, dur);
+  if (pan && c.createStereoPanner){ const p = c.createStereoPanner(); p.pan.value = pan; o.connect(g); g.connect(p); p.connect(dest); } else { o.connect(g); g.connect(dest); }
+  o.start(t); o.stop(t + a + dur + .05);
+}
+function noise(t, dur, { freq = 800, type = 'lowpass', gain = .2, dest = AU.sfx, to = null } = {}){
+  const c = AU.ctx, s = c.createBufferSource(), f = c.createBiquadFilter(), g = c.createGain();
+  s.buffer = AU.noise; f.type = type; f.frequency.setValueAtTime(freq, t); if (to) f.frequency.exponentialRampToValueAtTime(to, t + dur);
+  env(g, t, .01, gain, dur); s.connect(f); f.connect(g); g.connect(dest); s.start(t, Math.random()); s.stop(t + dur + .1);
+}
+function bell(m, t, gain = .07, dest = AU.sfx){ tone(mf(m), t, 1.3, { gain, dest }); tone(mf(m) * 2, t, .6, { gain: gain * .35, dest }); }
+
+function schedule(){
+  const c = AU.ctx; if (!c || c.state !== 'running') return;
+  if (!playing) AU.tgt = 0;
+  AU.danger += (AU.tgt - AU.danger) * .25;
+  AU.dr.gain.setTargetAtTime(.09 * AU.danger, c.currentTime, .3);
+  if (AU.next < c.currentTime) AU.next = c.currentTime + .05;
+  while (AU.next < c.currentTime + .45){ playBeat(AU.next, AU.beat); AU.next += BEAT; AU.beat++; }
+}
+function playBeat(t, b){
+  const side = (playing || story) && W.who === 'girl' ? 'girl' : 'boy';
+  const ch = PROG[side][Math.floor(b / 4) % 4], calm = 1 - AU.danger;
+  if (b % 4 === 0){
+    for (const m of ch){
+      [-4, 4].forEach(dt => {
+        const o = AU.ctx.createOscillator(), g = AU.ctx.createGain(), f = AU.ctx.createBiquadFilter();
+        o.type = 'triangle'; o.frequency.value = mf(m); o.detune.value = dt; f.type = 'lowpass'; f.frequency.value = 900;
+        g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(.022 * (.5 + calm * .5), t + 1.3);
+        g.gain.setValueAtTime(.022 * (.5 + calm * .5), t + BEAT * 4 - .4); g.gain.linearRampToValueAtTime(0, t + BEAT * 4 + 1.2);
+        o.connect(f); f.connect(g); g.connect(AU.mus); o.start(t); o.stop(t + BEAT * 4 + 1.3);
+      });
+    }
+    tone(mf(ch[0] - 24), t, BEAT * 4, { gain: .09, a: .6, dest: AU.mus });
+  }
+  // music-box melody
+  const scale = [...ch, ch[0] + 2, ch[1] + 5].map(m => m + 12);
+  for (const off of [0, BEAT / 2]){
+    if (Math.random() < .38 * calm){ const m = scale[Math.floor(Math.random() * scale.length)] + (Math.random() < .3 ? 12 : 0); bell(m, t + off, .045, AU.mus); }
+  }
+  // crickets / night sounds
+  if (Math.random() < .35 * calm){
+    const ct = t + Math.random() * BEAT, pan = Math.random() * 1.6 - .8;
+    for (let i = 0; i < 3; i++) tone(4300 + Math.random() * 300, ct + i * .045, .03, { gain: .012, dest: AU.mus, pan });
+  }
+  // heartbeat when something is near
+  if (AU.danger > .12 && b % 2 === 0){
+    const g = .32 * AU.danger;
+    tone(70, t, .18, { gain: g, to: 38, dest: AU.mus }); tone(64, t + .2, .2, { gain: g * .8, to: 34, dest: AU.mus });
+    if (AU.danger > .45) setTimeout(() => buzz([35, 160, 35]), Math.max(0, (t - AU.ctx.currentTime) * 1000));
+  }
+}
+function sfx(k){
+  if (!AU.ctx || SET.sfx === 'off') return;
+  const t = AU.ctx.currentTime + .01;
+  if (k === 'blip') tone(820 + Math.random() * 120, t, .03, { type: 'square', gain: .018 });
+  else if (k === 'look') { tone(660, t, .08, { gain: .06 }); tone(990, t + .07, .1, { gain: .05 }); }
+  else if (k === 'clue') [72, 76, 79, 84].forEach((m, i) => bell(m, t + i * .09, .07));
+  else if (k === 'solve') [60, 64, 67, 72, 76, 79, 84, 88].forEach((m, i) => bell(m, t + i * .08, .06));
+  else if (k === 'gate') noise(t, 1.4, { freq: 260, gain: .25, to: 90 });
+  else if (k === 'caught') { noise(t, .5, { freq: 1200, gain: .35, to: 120 }); tone(130, t, .6, { gain: .4, to: 38 }); }
+  else if (k === 'hollow') { tone(466, t, 2.2, { gain: .08, to: 233, a: .3 }); tone(494, t, 2.2, { gain: .07, to: 247, a: .3 }); noise(t, 1.6, { freq: 3000, type: 'bandpass', gain: .15, to: 400 }); }
+  else if (k === 'msg') { bell(84, t, .06); bell(88, t + .12, .05); }
+}
+function buzz(p){ if (SET.vib !== 'off' && navigator.vibrate){ try { navigator.vibrate(p); } catch(e){} } }
+function textStep(c, dt, full){
+  const n = Math.min(full.length, c + dt * TEXT_SPEED[SET.text]);
+  if (Math.floor(n / 2) > Math.floor(c / 2)){ const ch = full[Math.floor(n) - 1]; if (ch && ch !== ' ') sfx('blip'); }
+  return n;
+}
+if (!navigator.vibrate) { const r = $('vibRow'); if (r) r.querySelector('span').textContent = 'Vibration (not on this device)'; }
+
+/* ---------- in-game tips (each shows once per game) ---------- */
+let tipT = 0;
+function tip(key, text, secs = 5){
+  if (Q.tips.has(key)) return; Q.tips.add(key);
+  const el = $('tip'); el.textContent = text; el.classList.add('on');
+  clearTimeout(tipT); tipT = setTimeout(() => el.classList.remove('on'), secs * 1000);
+}
+
+/* ---------- how to play ---------- */
+const HOWTO = () => [
+  { art: ['bi', 'gi'], t: 'Find each other', x: 'You two got separated in a dark forest. He searches for her. She is trapped deeper inside. Your goal: find each other.' },
+  { art: '🕹️', t: 'Moving', x: isTouch ? 'Drag the joystick at the bottom-left to walk. Push it further to run. Turn your phone sideways.' : 'Walk with ← → or A / D. Hold Shift to run.' },
+  { art: '✋', t: 'Look at things', x: (isTouch ? 'When a white ! appears over something, tap the ✋ button.' : 'When a white E appears over something, press E.') + ' Tap the text box to keep reading. Clues are saved in your 📜 notebook.' },
+  { art: '🗣️', t: 'Talk to each other', x: 'You each see different clues. Her clues open his path, and his clues open hers. Say what you see out loud, or send a 💬 message.', ex: 'Example: she finds ▲ ○ ▲ on a stone. He needs it to open a gate.' },
+  { art: ['m_bear'], t: 'Watch out for creatures', x: 'A yellow ! over your head means something is coming. Hide in the tall grass and stand still until it passes. If you see "Don\'t move." then don\'t move at all.' },
+  { art: '♥♥♥', t: 'Hearts', x: 'Getting caught costs a heart and sends you back a little. You can never lose for good, so take your time.' },
+  { art: '🗺️', t: 'Stuck?', x: 'Your goal is always at the top-left. Check the 🗺 map and your 📜 clues, and ask your partner for help.' }
+];
+let HW = { i: 0, then: null, list: [] };
+function spriteEl(k, h){
+  const a = A[k], w = Math.round(a.w * h / a.h), d = document.createElement('div'); d.className = 'sp';
+  Object.assign(d.style, { width: w + 'px', height: h + 'px', backgroundImage: `url(${a.src})`, backgroundSize: `${w * a.n}px ${h}px` });
+  return d;
+}
+function renderHowto(){
+  const s = HW.list[HW.i], art = $('hArt'); art.innerHTML = '';
+  if (Array.isArray(s.art)) s.art.forEach(k => art.appendChild(spriteEl(k, 70))); else art.textContent = s.art;
+  $('hTitle').textContent = s.t; $('hText').textContent = s.x;
+  $('hEx').textContent = s.ex || ''; $('hEx').style.display = s.ex ? 'block' : 'none';
+  $('hDots').innerHTML = HW.list.map((_, i) => `<i class="${i === HW.i ? 'on' : ''}"></i>`).join('');
+  $('hPrev').style.visibility = HW.i ? 'visible' : 'hidden';
+  const last = HW.i === HW.list.length - 1;
+  $('hNext').textContent = last ? (HW.then ? 'Start the adventure' : 'Got it') : 'Next';
+  let seen = false; try { seen = localStorage.getItem('us2-howto') === '1'; } catch(e){}
+  $('hSkip').style.display = (seen || !HW.then) && !last ? 'inline-block' : 'none';
+}
+function openHowto(then){ HW = { i: 0, then, list: HOWTO() }; show('howto'); renderHowto(); }
+function finishHowto(){
+  try { localStorage.setItem('us2-howto', '1'); } catch(e){}
+  const t = HW.then; HW.then = null;
+  if (t) t(); else show('menu');
+}
+$('hNext').onclick = () => { sfx('look'); if (HW.i < HW.list.length - 1){ HW.i++; renderHowto(); } else finishHowto(); };
+$('hPrev').onclick = () => { if (HW.i){ HW.i--; renderHowto(); } };
+$('hSkip').onclick = finishHowto;
+$('menuHow').onclick = () => openHowto(null);
+$('s-how').onclick = () => { if (playing) return; closeSettings(); openHowto(null); };
+addEventListener('keydown', e => { if (!$('howto').classList.contains('on')) return; if (e.key === 'ArrowRight' || e.key === 'Enter') $('hNext').click(); if (e.key === 'ArrowLeft') $('hPrev').click(); });
 
 /* ---------- multiplayer: room codes over Supabase Realtime ---------- */
 const SB_URL = 'https://ihbblnbqjzdewiopqmxd.supabase.co';
@@ -1209,10 +1420,9 @@ function checkStart(){
   const r = NET.room || {};
   if (NET.started || !NET.role || !(r.boy_ready && r.girl_ready)) return;
   NET.started = true;
-  show(null); document.body.classList.add('playing', 'netplay');
+  document.body.classList.add('netplay');
   $('chatTitle').textContent = 'Message ' + (NET.role === 'boy' ? 'her' : 'him');
-  startStory(NET.role);
-  if (isTouch){ try { document.documentElement.requestFullscreen?.().then(() => screen.orientation?.lock?.('landscape')).catch(() => {}); } catch(e){} }
+  openHowto(() => enterForest(NET.role));
 }
 async function leaveRoom(){
   if (!NET.on) return;
@@ -1238,6 +1448,7 @@ async function netSend(kind, payload){
 function onNetEvent(e){
   if (!e || e.sender === NET.role) return;
   const who = pron(e.sender), pl = e.payload || {};
+  sfx('msg'); buzz([20, 60, 20]);
   if (e.kind === 'chat'){ logChat(who, pl.text, 'them'); toast(`💬 ${who}: ${pl.text}`); }
   else if (e.kind === 'clue') toast(`📜 ${who} found a clue: ${pl.t}`);
   else if (e.kind === 'step' && OBJ[e.sender][pl.n]) toast(`${who} is now: ${OBJ[e.sender][pl.n]}`);

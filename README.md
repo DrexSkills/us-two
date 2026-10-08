@@ -13,6 +13,9 @@ A cooperative 16-bit pixel-art adventure for couples. One player is the Boy, sea
 - Full-screen parchment map with areas, fog over unexplored parts, and a "You" marker (Map button or M key)
 - Controls: on-screen joystick on phones, ← → / A D + Shift on desktop
 - Play together: create a game, share the room code (like US2-4821), your partner joins on their phone, each picks a character, and you enter the forest together. Clues and progress pop up on your partner's screen, plus quick messages with 💬
+- How-to-play guide before the game starts (also on the main menu), plus helpful tips the first time something new happens
+- Calm night-forest music (different for each side), heartbeat and tension when creatures are near, sounds for text, clues and puzzles
+- Phone vibration on Android (caught, clues, puzzles, creatures nearby)
 - Objectives, a clue notebook and hearts for both players
 - Cross-player puzzles: she finds the gate symbol he needs, he finds the stone color order she needs
 - Creatures: Ragged Bear and Shadow Stalker (his side), Forest Wraith and the Hollow (her side). Hide in tall grass, or stay completely still when the Hollow appears
