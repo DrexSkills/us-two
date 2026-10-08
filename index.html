@@ -358,7 +358,7 @@ let stickX = 0;
     if (d > max){ dx *= max / d; dy *= max / d; }
     knob.style.transform = `translate(${dx}px,${dy}px)`; stickX = dx / max;
   }
-  base.addEventListener('pointerdown', e => { id = e.pointerId; base.setPointerCapture(id); move(e); });
+  base.addEventListener('pointerdown', e => { id = e.pointerId; try { base.setPointerCapture(id); } catch(err){} move(e); });
   base.addEventListener('pointermove', e => { if (e.pointerId === id) move(e); });
   const end = e => { if (e.pointerId !== id) return; id = null; stickX = 0; knob.style.transform = ''; };
   base.addEventListener('pointerup', end); base.addEventListener('pointercancel', end);
@@ -1320,7 +1320,7 @@ addEventListener('keydown', e => { if (!$('howto').classList.contains('on')) ret
 /* ---------- multiplayer: room codes over Supabase Realtime ---------- */
 const SB_URL = 'https://ihbblnbqjzdewiopqmxd.supabase.co';
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImloYmJsbmJxanpkZXdpb3BxbXhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAyODI2NTQsImV4cCI6MjEwNTg1ODY1NH0.7n7GBT2T-BZEId3iMEVOuhSTMeDULB_cTpmTa7IyHMQ';
-const NET = { sb: null, on: false, code: null, role: null, room: null, ch: null, here: false, started: false, me: Math.random().toString(36).slice(2) };
+const NET = { sb: null, on: false, code: null, role: null, room: null, ch: null, here: false, pres: false, started: false, poll: 0, lastEv: null, seen: new Set(), me: Math.random().toString(36).slice(2) };
 const other = r => r === 'boy' ? 'girl' : 'boy';
 const pron = r => r === 'girl' ? 'She' : 'He';
 function loadSB(){
@@ -1378,7 +1378,9 @@ $('codeIn').addEventListener('keydown', e => { if (e.key === 'Enter') $('joinBtn
 $('bigcode').onclick = () => { try { navigator.clipboard.writeText(NET.code); $('bigcode').textContent = 'Copied!'; setTimeout(() => $('bigcode').textContent = NET.code, 900); } catch(e){} };
 
 async function enterRoom(code, data){
-  Object.assign(NET, { on: true, code, role: null, room: data, here: false, started: false });
+  Object.assign(NET, { on: true, code, role: null, room: data, here: false, pres: false, started: false, lastEv: null, seen: new Set() });
+  clearInterval(NET.poll);
+  NET.poll = setInterval(pollRoom, 2500);
   document.body.classList.add('net');
   $('bigcode').textContent = code;
   document.querySelectorAll('.pick').forEach(x => x.setAttribute('aria-pressed', 'false'));
@@ -1388,10 +1390,10 @@ async function enterRoom(code, data){
     .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'us2_rooms', filter: 'code=eq.' + code }, p => { NET.room = p.new; renderRoom(); checkStart(); })
     .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'us2_events', filter: 'code=eq.' + code }, p => onNetEvent(p.new))
     .on('presence', { event: 'sync' }, () => {
-      const was = NET.here; NET.here = Object.keys(NET.ch.presenceState()).length >= 2;
+      const was = NET.pres; NET.pres = Object.keys(NET.ch.presenceState()).length >= 2;
       renderRoom();
-      if (playing && was && !NET.here) toast('Your partner lost connection…');
-      if (playing && !was && NET.here) toast('Your partner is back ♥');
+      if (playing && was && !NET.pres) toast('Your partner lost connection…');
+      if (playing && !was && NET.pres && NET.started) toast('Your partner is back ♥');
     })
     .subscribe(async st => {
       if (st === 'SUBSCRIBED'){
@@ -1404,6 +1406,7 @@ async function enterRoom(code, data){
 function renderRoom(){
   if (!NET.on) return;
   const r = NET.room || {};
+  NET.here = NET.pres || (!!NET.role && !!r[other(NET.role) + '_joined']) || (!NET.role && (r.boy_joined || r.girl_joined));
   document.querySelectorAll('.pick').forEach(b => {
     const p = b.dataset.p;
     b.disabled = !!r[p + '_joined'] && NET.role !== p;
@@ -1443,6 +1446,8 @@ function checkStart(){
   const r = NET.room || {};
   if (NET.started || !NET.role || !(r.boy_ready && r.girl_ready)) return;
   NET.started = true;
+  sb().then(c => c.from('us2_events').select('id').eq('code', NET.code).order('id', { ascending: false }).limit(1))
+    .then(({ data }) => { if (NET.lastEv === null) NET.lastEv = data && data[0] ? data[0].id : 0; }).catch(() => { NET.lastEv = 0; });
   document.body.classList.add('netplay');
   $('chatTitle').textContent = 'Message ' + (NET.role === 'boy' ? 'her' : 'him');
   openHowto(() => enterForest(NET.role));
@@ -1450,6 +1455,7 @@ function checkStart(){
 async function leaveRoom(){
   if (!NET.on) return;
   const { code, role, ch } = NET;
+  clearInterval(NET.poll);
   Object.assign(NET, { on: false, code: null, role: null, room: null, ch: null, here: false, started: false });
   document.body.classList.remove('net', 'netplay');
   $('chatlog').innerHTML = '';
@@ -1464,17 +1470,34 @@ async function leaveRoom(){
 addEventListener('pagehide', () => { if (NET.on && NET.role){ try { fetch(`${SB_URL}/rest/v1/us2_rooms?code=eq.${NET.code}`, { method: 'PATCH', keepalive: true, headers: { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' }, body: JSON.stringify({ [NET.role + '_joined']: false, [NET.role + '_ready']: false }) }); } catch(e){} } });
 
 /* events between the two phones */
-async function netSend(kind, payload){
+let sendChain = Promise.resolve();
+function netSend(kind, payload){
   if (!NET.on || !NET.role || !NET.started) return;
-  try { const c = await sb(); await c.from('us2_events').insert({ code: NET.code, sender: NET.role, kind, payload }); } catch(e){ console.warn(e); }
+  const row = { code: NET.code, sender: NET.role, kind, payload };
+  sendChain = sendChain.then(async () => { try { const c = await sb(); await c.from('us2_events').insert(row); } catch(e){ console.warn(e); } });
+}
+async function pollRoom(){
+  if (!NET.on) return;
+  try {
+    const c = await sb();
+    if (!NET.started){
+      const { data } = await c.from('us2_rooms').select('*').eq('code', NET.code).maybeSingle();
+      if (data && NET.on && !NET.started){ NET.room = data; renderRoom(); checkStart(); }
+    } else if (NET.lastEv !== null){
+      const { data } = await c.from('us2_events').select('*').eq('code', NET.code).gt('id', NET.lastEv).order('id', { ascending: true }).limit(20);
+      (data || []).forEach(onNetEvent);
+    }
+  } catch(e){}
 }
 function onNetEvent(e){
-  if (!e || e.sender === NET.role) return;
+  if (!e || NET.seen.has(e.id)) return;
+  NET.seen.add(e.id); if (NET.lastEv !== null && e.id > NET.lastEv) NET.lastEv = e.id;
+  if (e.sender === NET.role) return;
   const who = pron(e.sender), pl = e.payload || {};
   sfx('msg'); buzz([20, 60, 20]);
   if (e.kind === 'chat'){ logChat(who, pl.text, 'them'); toast(pl.text, `💬 ${who} says`, 'chat'); }
   else if (e.kind === 'clue') toast(pl.t, `📜 ${who} found a clue`, 'clue');
-  else if (e.kind === 'step' && OBJ[e.sender][pl.n]) toast(OBJ[e.sender][pl.n], `${who}'s next goal`);
+  else if (e.kind === 'step' && OBJ[e.sender][pl.n]) toast(OBJ[e.sender][pl.n], `${e.sender === 'girl' ? 'Her' : 'His'} next goal`);
 }
 let toastT = 0;
 const TQ = []; let toastNow = null;
