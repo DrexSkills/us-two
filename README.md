@@ -6,7 +6,7 @@ A cooperative 16-bit pixel-art adventure for couples. One player is the Boy, sea
 
 ## Current prototype
 - Title screen and character select (Boy / Girl)
-- Story intro: the couple heads into the forest, sets up camp, he goes for firewood… and she's gone
+- Story intro: the couple heads into the forest, sets up camp, he goes for firewood… and she's gone. Each player sees their own side of the story
 - Side-scrolling night forest with parallax, fireflies and lanterns
 - Separate worlds: Forest Entrance (Boy) and The Hollow (Girl)
 - Walking and running

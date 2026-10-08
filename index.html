@@ -293,6 +293,15 @@ function draw(){
   if (W.who === 'boy') drawCamp(cam);
   if (story){ for (const k of ['girl','boy']){ const ac = story.a[k]; if (ac.vis) drawChar(k, ac, cam); } }
   else drawChar(W.who, P, cam);
+  if (story && story.lure){
+    ctx.globalCompositeOperation = 'lighter';
+    for (let i = 0; i < 7; i++){
+      const fx = story.lure.x - cam + (i - 3) * 9 + Math.sin(time * 2 + i) * 6, fy = GROUND - 38 + Math.cos(time * 1.7 + i * 1.3) * 7 - Math.abs(i - 3) * 3;
+      const a = .6 + .4 * Math.sin(time * 3 + i);
+      glow(fx, fy, 10, 'rgba(210,255,140,A)', a * .55); ctx.fillStyle = `rgba(240,255,190,${a})`; ctx.fillRect(Math.round(fx), Math.round(fy), 2, 2);
+    }
+    ctx.globalCompositeOperation = 'source-over';
+  }
 
   // fireflies
   ctx.globalCompositeOperation = 'lighter';
@@ -373,6 +382,8 @@ function buildScript(choice){
     { say: ['boy', "Five minutes. Don't go anywhere."] },
     { say: ['girl', "Where would I even go? Go!"] },
     { walk: { boy: CAMP + 360 } },
+  ];
+  if (choice === 'boy') S.push(
     { do: st => { st.a.girl.face = -1; } },
     { wait: 1.2 },
     { fade: 'out' },
@@ -391,15 +402,34 @@ function buildScript(choice){
     { wait: .6 },
     { say: ['boy', "Hold on. I'm coming to find you."] },
     { fade: 'out' }
-  ];
-  if (choice === 'girl') S.push(
-    { card: 'Meanwhile, somewhere deeper in the forest…' },
-    { do: st => { buildWorld('girl'); st.a.boy.vis = false; st.a.girl.vis = true; st.a.girl.x = 90; st.a.girl.face = 1; st.camT = 0; st.cam = 0; } },
+  );
+  else S.push(
+    { do: st => { st.a.boy.vis = false; st.a.girl.face = 1; } },
+    { wait: .8 },
+    { say: ['girl', "Okay. Tent first, then marshmallows. Easy."] },
+    { do: st => { st.a.girl.face = -1; st.lure = { x: CAMP - 150 }; } },
+    { wait: 1.2 },
+    { say: ['girl', "…Fireflies? There are so many of them."] },
+    { say: ['girl', "They're glowing in a little line. Almost like they want me to follow."] },
+    { say: ['girl', "Just a few steps. I'll be back before he is."] },
+    { do: () => { camp.lantern = true; } },
+    { say: ['girl', "I'll leave the lantern here, so he knows I'm close."] },
+    { cam: CAMP - 330, walk: { girl: CAMP - 400 }, lureTo: CAMP - 460 },
+    { wait: .6 },
+    { say: ['girl', "Wait… which way did I come from?"] },
+    { do: st => { st.a.girl.face = 1; } }, { wait: .8 },
+    { do: st => { st.a.girl.face = -1; } }, { wait: .5 },
+    { do: st => { st.lure = null; } }, { wait: .9 },
+    { say: ['girl', "Hello? Can you hear me?"] },
+    { fade: 'out' },
+    { card: 'The fireflies flickered out, one by one…' },
+    { do: st => { buildWorld('girl'); st.a.girl.vis = true; st.a.girl.x = 90; st.a.girl.face = 1; st.camT = 0; st.cam = 0; } },
     { fade: 'in' },
     { wait: .6 },
     { say: ['girl', "Where… am I? This isn't our camp."] },
-    { say: ['girl', "I just followed the fireflies for a second, and now everything looks different."] },
-    { say: ['girl', "He'll come looking for me. I know he will."] }
+    { say: ['girl', "The trees look older here. And those stones are glowing."] },
+    { say: ['girl', "Okay. Don't panic. He's going to come looking for me."] },
+    { say: ['girl', "I just have to help him find me."] }
   );
   return S;
 }
@@ -440,6 +470,10 @@ function storyUpdate(dt){
       a.speed = d * 55; a.x += a.speed * dt; if (Math.sign(tx - a.x) !== d) a.x = tx;
       a.t += dt * .8;
     } else { a.speed = 0; a.t += dt * .35; }
+  }
+  if (st.lure && s.lureTo !== undefined && Math.abs(s.lureTo - st.lure.x) > 1){
+    arrived = false; const d = Math.sign(s.lureTo - st.lure.x); st.lure.x += d * 50 * dt;
+    if (Math.sign(s.lureTo - st.lure.x) !== d) st.lure.x = s.lureTo;
   }
   if (s.say){ if (st.chars < st.full.length){ st.chars = Math.min(st.full.length, st.chars + dt * 40); txt.textContent = st.full.slice(0, Math.floor(st.chars)); } return; }
   if (s.walk && !arrived) return;
