@@ -1152,11 +1152,6 @@ function audioStart(){
       // noise buffer (wind + effects)
       const nb = AU.noise = c.createBuffer(1, c.sampleRate * 2, c.sampleRate), nd = nb.getChannelData(0);
       for (let i = 0; i < nd.length; i++) nd[i] = Math.random() * 2 - 1;
-      const wn = c.createBufferSource(); wn.buffer = nb; wn.loop = true;
-      const wf = c.createBiquadFilter(); wf.type = 'bandpass'; wf.frequency.value = 380; wf.Q.value = .6;
-      const wg = c.createGain(); wg.gain.value = .045;
-      const lfo = c.createOscillator(), lg = c.createGain(); lfo.frequency.value = .07; lg.gain.value = 220; lfo.connect(lg); lg.connect(wf.frequency); lfo.start();
-      wn.connect(wf); wf.connect(wg); wg.connect(AU.mus); wn.start();
       // danger drone
       AU.dr = c.createGain(); AU.dr.gain.value = 0;
       const df = c.createBiquadFilter(); df.type = 'lowpass'; df.frequency.value = 190; df.connect(AU.dr); AU.dr.connect(AU.mus);
@@ -1214,14 +1209,18 @@ function playBeat(t, b){
     tone(mf(ch[0] - 24), t, BEAT * 4, { gain: .09, a: .6, dest: AU.mus });
   }
   // music-box melody
-  const scale = [...ch, ch[0] + 2, ch[1] + 5].map(m => m + 12);
-  for (const off of [0, BEAT / 2]){
-    if (Math.random() < .38 * calm){ const m = scale[Math.floor(Math.random() * scale.length)] + (Math.random() < .3 ? 12 : 0); bell(m, t + off, .045, AU.mus); }
+  // gentle melody: steps up and down instead of random plinks
+  const scale = [...ch, ch[0] + 12].map(m => m + 12);
+  if (b % 2 === 0 && Math.random() < .55 * calm){
+    AU.mel = Math.max(0, Math.min(scale.length - 1, (AU.mel || 0) + (Math.random() < .5 ? -1 : 1)));
+    const m = scale[AU.mel];
+    tone(mf(m), t, BEAT * 2.2, { gain: .035, a: .06, dest: AU.mus }); tone(mf(m) * 2, t, BEAT, { gain: .008, a: .06, dest: AU.mus });
   }
-  // crickets / night sounds
-  if (Math.random() < .35 * calm){
-    const ct = t + Math.random() * BEAT, pan = Math.random() * 1.6 - .8;
-    for (let i = 0; i < 3; i++) tone(4300 + Math.random() * 300, ct + i * .045, .03, { gain: .012, dest: AU.mus, pan });
+  // a cricket trill now and then, and the odd owl
+  if (Math.random() < .12 * calm) chirp(t + Math.random() * BEAT, Math.random() * 1.4 - .7);
+  if (Math.random() < .02 * calm){
+    const ot = t + Math.random() * BEAT, pan = Math.random() * 1.2 - .6;
+    tone(392, ot, .35, { gain: .03, to: 370, a: .08, dest: AU.mus, pan }); tone(392, ot + .55, .6, { gain: .035, to: 350, a: .1, dest: AU.mus, pan });
   }
   // heartbeat when something is near
   if (AU.danger > .12 && b % 2 === 0){
@@ -1229,6 +1228,14 @@ function playBeat(t, b){
     tone(70, t, .18, { gain: g, to: 38, dest: AU.mus }); tone(64, t + .2, .2, { gain: g * .8, to: 34, dest: AU.mus });
     if (AU.danger > .45) setTimeout(() => buzz([35, 160, 35]), Math.max(0, (t - AU.ctx.currentTime) * 1000));
   }
+}
+function chirp(t, pan){
+  const c = AU.ctx, o = c.createOscillator(), am = c.createGain(), lfo = c.createOscillator(), lg = c.createGain(), out = c.createGain();
+  o.frequency.value = 4200; lfo.frequency.value = 26; lg.gain.value = .5; am.gain.value = .5;
+  lfo.connect(lg); lg.connect(am.gain); o.connect(am); am.connect(out);
+  out.gain.setValueAtTime(0, t); out.gain.linearRampToValueAtTime(.007, t + .06); out.gain.setValueAtTime(.007, t + .28); out.gain.linearRampToValueAtTime(0, t + .4);
+  if (c.createStereoPanner){ const p = c.createStereoPanner(); p.pan.value = pan; out.connect(p); p.connect(AU.mus); } else out.connect(AU.mus);
+  o.start(t); lfo.start(t); o.stop(t + .45); lfo.stop(t + .45);
 }
 function sfx(k){
   if (!AU.ctx || SET.sfx === 'off') return;
