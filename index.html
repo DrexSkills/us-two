@@ -15,7 +15,7 @@ html{scroll-padding-top:env(safe-area-inset-top,0px)}
 *,*::before,*::after{box-sizing:inherit}
 html,body{height:100%;margin:0;overflow:hidden;background:var(--night);color:var(--paper);
   font-family:"Pixelify Sans",ui-monospace,"Courier New",monospace;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;touch-action:none}
-canvas{position:fixed;inset:0;width:100%;height:100%;image-rendering:pixelated;display:block}
+#c{position:fixed;inset:0;width:100%;height:100%;image-rendering:pixelated;display:block}
 .screen{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:max(20px,env(safe-area-inset-top)) 20px max(20px,env(safe-area-inset-bottom));text-align:center;z-index:5;overflow-y:auto}
 .screen.on{display:flex}
 #menu,#setup{background:rgba(8,16,19,.55)}
@@ -42,7 +42,8 @@ input{font:inherit;font-size:20px;background:#0a1214;color:var(--paper);border:4
 #hud{position:fixed;inset:0;pointer-events:none;z-index:4;display:none}
 #hud.on{display:block}
 .who{position:absolute;top:calc(env(safe-area-inset-top,0px) + 12px);left:calc(env(safe-area-inset-left,0px) + 14px);font-size:18px;background:rgba(8,16,19,.7);padding:6px 12px;border:3px solid var(--line)}
-#quit{pointer-events:auto;position:absolute;top:calc(env(safe-area-inset-top,0px) + 10px);right:calc(env(safe-area-inset-right,0px) + 12px);font:inherit;font-size:16px;color:var(--paper);background:rgba(8,16,19,.7);border:3px solid var(--line);min-width:48px;min-height:44px;padding:6px 12px;cursor:pointer}
+.hbtns{position:absolute;top:calc(env(safe-area-inset-top,0px) + 10px);right:calc(env(safe-area-inset-right,0px) + 12px);display:flex;gap:8px}
+#quit,#mapbtn{pointer-events:auto;font:inherit;font-size:16px;color:var(--paper);background:rgba(8,16,19,.7);border:3px solid var(--line);min-width:48px;min-height:44px;padding:6px 12px;cursor:pointer}
 #title{position:absolute;left:0;right:0;top:22%;font-size:clamp(26px,5vw,44px);color:var(--paper);text-shadow:3px 3px 0 #000;opacity:0;transition:opacity .9s}
 #title small{display:block;font-size:.5em;color:var(--rose);margin-bottom:4px}
 #keys{position:absolute;bottom:calc(env(safe-area-inset-bottom,0px) + 14px);left:0;right:0;font-size:16px;opacity:.65}
@@ -62,6 +63,11 @@ input{font:inherit;font-size:20px;background:#0a1214;color:var(--paper);border:4
 @keyframes blink{50%{opacity:0}}
 #skip{position:fixed;z-index:9;bottom:calc(env(safe-area-inset-bottom,0px) + 12px);right:calc(env(safe-area-inset-right,0px) + 12px);font:inherit;font-size:16px;color:var(--paper);background:rgba(8,16,19,.7);border:3px solid var(--line);min-height:44px;padding:6px 14px;cursor:pointer;display:none}
 #skip.on{display:block}
+#mapbtn{font-size:18px;min-width:72px;border-color:#7a5c34;color:#f2dcae}
+#map{position:fixed;inset:0;z-index:7;background:rgba(5,9,11,.9);display:none;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:max(12px,env(safe-area-inset-top)) 16px max(12px,env(safe-area-inset-bottom))}
+#map.on{display:flex}
+#mapc{width:min(calc(100vw - 32px),calc((100vh - 100px) * 2.1333));height:auto;image-rendering:pixelated;box-shadow:0 0 0 4px #000,0 10px 30px rgba(0,0,0,.6)}
+#mapclose{min-width:180px;min-height:48px;font-size:19px;padding:8px 22px}
 #rotate{position:fixed;inset:0;z-index:20;background:var(--night);display:none;flex-direction:column;align-items:center;justify-content:center;gap:22px;padding:30px;text-align:center}
 #rotate p{font-size:22px;margin:0;max-width:280px;line-height:1.4}
 .phone{width:54px;height:92px;border:5px solid var(--paper);border-radius:8px;position:relative;animation:turn 2.2s ease-in-out infinite}
@@ -92,12 +98,13 @@ input{font:inherit;font-size:20px;background:#0a1214;color:var(--paper);border:4
 
 <div id="hud">
   <div class="who" id="who"></div>
-  <button id="quit" aria-label="Back to menu">Menu</button>
+  <div class="hbtns"><button id="mapbtn" aria-label="Open map">🗺 Map</button><button id="quit" aria-label="Back to menu">Menu</button></div>
   <div id="title"></div>
-  <div id="keys">Walk with ← → or A / D · hold Shift to run</div>
+  <div id="keys">Walk with ← → or A / D · hold Shift to run · M for map</div>
   <div id="stick"><div id="knob"></div></div>
 </div>
 
+<div id="map" role="dialog" aria-label="Map"><canvas id="mapc" width="640" height="300"></canvas><button class="btn" id="mapclose">Close map</button></div>
 <div id="fade"><div id="card"></div></div>
 <div id="dlg"><div id="spk"></div><div id="txt"></div><div id="nxt">Tap to continue ▼</div></div>
 <button id="skip">Skip story</button>
@@ -126,8 +133,8 @@ function rng(seed){ return () => { seed = (seed * 1664525 + 1013904223) >>> 0; r
 
 /* ---------- themes per player ---------- */
 const THEMES = {
-  boy:  { area:'Forest Entrance', chapter:'Chapter 1 · The Forest', sky:['#0b1630','#1d2c4f','#3b3f5e'], far:'#16233a', mid:'#14261f', midHi:'#1f3a2a', near:'#0f1d16', nearHi:'#28452e', grass:'#4f7d3b', grassHi:'#7fae54', dirt:'#4a2f22', dirtDk:'#33201a', river:true, seed:7, flies:26 },
-  girl: { area:'The Hollow', chapter:'Chapter 1 · Somewhere deeper', sky:['#120f26','#2a1f45','#4b2f52'], far:'#1d1a35', mid:'#18172b', midHi:'#2a2846', near:'#120f1e', nearHi:'#2c2a40', grass:'#3f6a45', grassHi:'#6c9a63', dirt:'#3a2a2c', dirtDk:'#271b1e', river:false, seed:21, flies:44 }
+  boy:  { area:'Forest Entrance', chapter:'Chapter 1 · The Forest', sky:['#0b1630','#1d2c4f','#3b3f5e'], far:'#16233a', mid:'#14261f', midHi:'#1f3a2a', near:'#0f1d16', nearHi:'#28452e', grass:'#4f7d3b', grassHi:'#7fae54', dirt:'#4a2f22', dirtDk:'#33201a', river:true, seed:7, flies:26, zones:[[0,'Forest Entrance'],[1250,'Old Bridge'],[1850,'River Bend'],[2450,'Forgotten Camp']] },
+  girl: { area:'The Hollow', chapter:'Chapter 1 · Somewhere deeper', sky:['#120f26','#2a1f45','#4b2f52'], far:'#1d1a35', mid:'#18172b', midHi:'#2a2846', near:'#120f1e', nearHi:'#2c2a40', grass:'#3f6a45', grassHi:'#6c9a63', dirt:'#3a2a2c', dirtDk:'#271b1e', river:false, seed:21, flies:44, zones:[[0,'The Hollow'],[1300,'Stone Circle'],[2250,'Whispering Pines']] }
 };
 
 /* ---------- pixel drawing helpers ---------- */
@@ -204,7 +211,7 @@ function buildWorld(who){
   const lanterns = []; for (let x = 420; x < WORLD_W; x += 520) if (!(bridge && x > bridge.a - 20 && x < bridge.b + 20)) lanterns.push(x);
   const flies = Array.from({ length: T.flies }, () => ({ x: R() * WORLD_W, y: 120 + R() * 95, p: R() * 6.28, s: .5 + R() }));
   const stars = Array.from({ length: 70 }, () => ({ x: R(), y: R() * .5, p: R() * 6.28, b: R() < .15 }));
-  W = { who, T, far, mid, near, ground, props, lanterns, flies, stars };
+  W = { explored: 0, zone: 0, who, T, far, mid, near, ground, props, lanterns, flies, stars };
 }
 
 /* ---------- player ---------- */
@@ -241,6 +248,9 @@ function update(dt){
   if (dir) P.face = dir > 0 ? 1 : -1;
   P.x = Math.max(20, Math.min(WORLD_W - 20, P.x + P.speed * dt));
   P.t += dt * (P.speed ? Math.abs(P.speed) / 70 : .35);
+  W.explored = Math.max(W.explored, P.x);
+  let zi = 0; W.T.zones.forEach((z, i) => { if (P.x >= z[0]) zi = i; });
+  if (zi !== W.zone){ W.zone = zi; showTitle(W.T.chapter, W.T.zones[zi][1]); }
 }
 
 /* ---------- render ---------- */
@@ -502,7 +512,98 @@ function beginPlay(choice){
   setFade(0);
   $('hud').classList.add('on'); playing = true;
   $('who').textContent = choice === 'boy' ? 'He · The Boy' : 'She · The Girl';
-  const t = $('title'); t.innerHTML = `<small>${W.T.chapter}</small>${W.T.area}`; t.style.opacity = 1; setTimeout(() => t.style.opacity = 0, 3200);
+  W.explored = P.x; W.zone = -1;
+}
+let titleTimer = 0;
+function showTitle(small, big){
+  const t = $('title'); t.innerHTML = `<small>${small}</small>${big}`; t.style.opacity = 1;
+  clearTimeout(titleTimer); titleTimer = setTimeout(() => t.style.opacity = 0, 3000);
+}
+
+/* ---------- map ---------- */
+const mapc = $('mapc'), mg = mapc.getContext('2d');
+let mapOpen = false;
+function openMap(){ if (!playing || story) return; mapOpen = true; $('map').classList.add('on'); drawMap(); }
+function closeMap(){ mapOpen = false; $('map').classList.remove('on'); }
+$('mapbtn').onclick = openMap; $('mapclose').onclick = closeMap;
+$('map').addEventListener('pointerdown', e => { if (e.target.id === 'map') closeMap(); });
+addEventListener('keydown', e => { const k = e.key.toLowerCase(); if (k === 'm') mapOpen ? closeMap() : openMap(); if (k === 'escape') closeMap(); });
+function drawMap(){
+  const g = mg, MW = 640, MH = 300, T = W.T, R = rng(99), ink = '#3b2616', paper = '#e6d2a6';
+  const X = wx => Math.round(50 + wx / WORLD_W * 540);
+  const Y = wx => Math.round(160 + Math.sin(wx / 260) * 14);
+  g.fillStyle = '#120c08'; g.fillRect(0, 0, MW, MH);
+  for (let y = 8; y < MH - 8; y += 2){
+    const l = 8 + Math.floor(R() * 6), r = 8 + Math.floor(R() * 6);
+    g.fillStyle = paper; g.fillRect(l, y, MW - l - r, 2);
+    g.fillStyle = '#c9a86c'; g.fillRect(l, y, 4, 2); g.fillRect(MW - r - 4, y, 4, 2);
+  }
+  g.fillStyle = '#c9a86c'; g.fillRect(14, 8, MW - 28, 4); g.fillRect(14, MH - 12, MW - 28, 4);
+  for (let i = 0; i < 600; i++){ g.fillStyle = 'rgba(120,80,40,.13)'; g.fillRect(16 + Math.floor(R() * (MW - 32)), 12 + Math.floor(R() * (MH - 26)), 2, 2); }
+
+  g.textAlign = 'center'; g.fillStyle = ink;
+  g.font = '700 20px "Pixelify Sans", monospace'; g.fillText(W.who === 'boy' ? 'The Forest' : 'The Hollow', MW / 2, 40);
+  g.font = '12px "Pixelify Sans", monospace'; g.fillText('Chapter 1', MW / 2, 56);
+
+  // compass
+  const cx = MW - 60, cy = 50; g.fillStyle = ink; g.fillRect(cx - 1, cy - 14, 2, 28); g.fillRect(cx - 14, cy - 1, 28, 2); g.fillRect(cx - 3, cy - 3, 6, 6);
+  g.font = '11px "Pixelify Sans", monospace'; g.fillText('N', cx, cy - 18);
+
+  // trees
+  for (let i = 0; i < 80; i++){
+    const wx = R() * WORLD_W, up = R() < .5, x = X(wx), y = Y(wx) + (up ? -28 - R() * 50 : 30 + R() * 34);
+    if (y < 70 || y > 240) continue;
+    for (let r = 0; r < 10; r += 2){ g.fillStyle = r < 2 ? '#3d4a29' : '#55663a'; g.fillRect(x - r / 2, y + r, r + 2, 2); }
+    g.fillStyle = '#5a3a22'; g.fillRect(x, y + 10, 2, 3);
+  }
+  // river + bridge
+  if (T.river){
+    const a = X(1460), b = X(1700);
+    for (let y = 66; y < 250; y += 2){ const off = Math.round(Math.sin(y / 12) * 4); g.fillStyle = '#7aa4c4'; g.fillRect(a + off, y, b - a, 2); g.fillStyle = '#5a86ab'; g.fillRect(a + off, y, 2, 2); }
+    g.fillStyle = '#7a5230'; for (let x = a - 4; x < b + 4; x += 4) g.fillRect(x, Y(1580) - 4, 3, 8);
+  }
+  // path
+  g.fillStyle = ink;
+  for (let wx = 0; wx < WORLD_W; wx += 22){ if (T.river && wx > 1450 && wx < 1710) continue; g.fillRect(X(wx), Y(wx), 6, 2); }
+  // landmarks
+  const icon = (wx, draw) => draw(X(wx), Y(wx) - 6);
+  if (W.who === 'boy'){
+    icon(CAMP - 80, (x, y) => { for (let r = 0; r < 12; r += 2){ g.fillStyle = '#a8763e'; g.fillRect(x - r / 2 - 1, y - 8 + r, r + 2, 2); } g.fillStyle = ink; g.fillRect(x - 1, y, 2, 4); });
+    icon(CAMP + 10, (x, y) => { g.fillStyle = '#c0502a'; g.fillRect(x - 2, y - 2, 4, 4); g.fillStyle = '#f2b350'; g.fillRect(x - 1, y - 4, 2, 3); });
+  } else {
+    for (const sx of [900, 1700, 2500]) icon(sx, (x, y) => { g.fillStyle = '#5c5b70'; g.fillRect(x - 3, y - 8, 6, 10); g.fillStyle = '#4fb8a5'; g.fillRect(x - 1, y - 5, 2, 2); });
+  }
+  for (const lx of W.lanterns) icon(lx, (x, y) => { g.fillStyle = ink; g.fillRect(x, y - 10, 2, 12); g.fillStyle = '#e09a2c'; g.fillRect(x + 2, y - 10, 3, 4); });
+  for (const p of W.props) if (p.k === 'sign' || p.k === 'chest') icon(p.x, (x, y) => { g.fillStyle = p.k === 'sign' ? '#7a5230' : '#b8862c'; g.fillRect(x - 4, y - 4, 8, 6); if (p.k === 'sign') { g.fillStyle = ink; g.fillRect(x - 1, y + 2, 2, 4); } });
+  // zones
+  g.font = '13px "Pixelify Sans", monospace';
+  const seen = W.explored + 250;
+  T.zones.forEach(([zx, name], i) => {
+    const end = T.zones[i + 1] ? T.zones[i + 1][0] : WORLD_W, mx = X((zx + end) / 2);
+    g.fillStyle = ink; g.fillText(seen >= zx ? name : '???', mx, 262);
+    if (i){ for (let y = 70; y < 250; y += 8){ g.fillStyle = 'rgba(59,38,22,.35)'; g.fillRect(X(zx), y, 2, 4); } }
+  });
+  // fog of the unknown
+  const fx = X(Math.min(WORLD_W, seen));
+  if (fx < MW - 20){
+    g.fillStyle = 'rgba(70,50,30,.55)'; g.fillRect(fx, 14, MW - 14 - fx, MH - 28);
+    g.fillStyle = 'rgba(40,26,14,.4)';
+    for (let k = fx - 300; k < MW; k += 10) for (let t = 14; t < MH - 14; t += 2){ const x = k + t; if (x > fx && x < MW - 16) g.fillRect(x, t, 2, 2); }
+    g.fillStyle = paper; g.font = '700 30px "Pixelify Sans", monospace'; g.fillText('?', (fx + MW - 14) / 2, Y(WORLD_W) + 8);
+  }
+  g.textAlign = 'center'; g.fillStyle = ink;
+  g.font = '700 20px "Pixelify Sans", monospace'; g.fillText(W.who === 'boy' ? 'The Forest' : 'The Hollow', MW / 2, 40);
+  g.font = '12px "Pixelify Sans", monospace'; g.fillText('Chapter 1', MW / 2, 56);
+  g.font = '13px "Pixelify Sans", monospace'; g.fillStyle = '#f6e6c2';
+  g.fillText(W.who === 'boy' ? "She's out here somewhere…" : "He's searching for me…", Math.min(MW - 110, Math.max(fx + 90, 470)), 92);
+  // you
+  const px = X(P.x), py = Y(P.x) - 16;
+  if (Math.floor(time * 2.5) % 2 === 0 || true){
+    const H = ['0110110','1111111','1111111','0111110','0011100','0001000'];
+    const pulse = Math.floor(time * 2.5) % 2;
+    H.forEach((row, ry) => [...row].forEach((c, rx) => { if (c === '1'){ g.fillStyle = pulse ? '#d23c4f' : '#f0647a'; g.fillRect(px - 7 + rx * 2, py + ry * 2, 2, 2); } }));
+  }
+  g.fillStyle = ink; g.font = '700 12px "Pixelify Sans", monospace'; g.fillText('You', px, py - 4);
 }
 
 /* ---------- loop ---------- */
@@ -511,9 +612,10 @@ function loop(ts){
   const dt = Math.min(.05, (ts - last) / 1000 || 0); last = ts; time += dt;
   const blocked = document.body.classList.contains('touch') && innerHeight > innerWidth;
   if (story){ if (!blocked) storyUpdate(dt); }
-  else if (playing && !blocked) update(dt);
+  else if (playing && !blocked && !mapOpen) update(dt);
   else if (!playing){ P.x += 18 * dt; if (P.x > WORLD_W - 300) P.x = 80; P.speed = 0; P.t += dt * .35; }
   draw();
+  if (mapOpen) drawMap();
   requestAnimationFrame(loop);
 }
 
@@ -541,7 +643,7 @@ $('go').onclick = async () => {
   if (isTouch){ try { await document.documentElement.requestFullscreen?.(); await screen.orientation?.lock?.('landscape'); } catch(e){} }
 };
 $('quit').onclick = () => {
-  playing = false; story = null; dlg.classList.remove('on'); $('skip').classList.remove('on'); cardEl.style.opacity = 0; setFade(0); camp.lantern = false; camp.wood = false;
+  closeMap(); playing = false; story = null; dlg.classList.remove('on'); $('skip').classList.remove('on'); cardEl.style.opacity = 0; setFade(0); camp.lantern = false; camp.wood = false;
   document.body.classList.remove('playing'); $('hud').classList.remove('on'); stickX = 0;
   try { document.fullscreenElement && document.exitFullscreen(); } catch(e){}
   show('menu');

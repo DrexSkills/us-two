@@ -10,6 +10,7 @@ A cooperative 16-bit pixel-art adventure for couples. One player is the Boy, sea
 - Side-scrolling night forest with parallax, fireflies and lanterns
 - Separate worlds: Forest Entrance (Boy) and The Hollow (Girl)
 - Walking and running
+- Full-screen parchment map with areas, fog over unexplored parts, and a "You" marker (Map button or M key)
 - Controls: on-screen joystick on phones, ← → / A D + Shift on desktop
 - Asks phone players to rotate to landscape
 
